@@ -25,7 +25,8 @@ def vertical_shifr_algoritm(message_no_space):
                 full_massiv[n] = str(massiv[i][j])
                 n += 1
 
-    return(full_massiv)
+    return full_massiv
+
 
 def vertical_deshifr_algoritm(stroka):
     lenght = int(len(stroka))
@@ -50,4 +51,5 @@ def vertical_deshifr_algoritm(stroka):
             if massiv[i][j] != 0:
                 full_massiv[n] = str(massiv[i][j])
                 n += 1
-    return (full_massiv)
+
+    return full_massiv
