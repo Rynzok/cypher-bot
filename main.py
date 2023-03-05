@@ -3,6 +3,7 @@ from telebot import types
 from vertical_shifrovanie import vertical_shifr_algoritm
 from vertical_shifrovanie import vertical_deshifr_algoritm
 from meandr_shifrovanie import meandr_shifr_algoritm
+from meandr_shifrovanie import meandr_deshifr_algoritm
 
 bot = telebot.TeleBot('6224570536:AAFi5BRh9OUwi3CwJqxSg5TObeOSbBNf3DE')
 
@@ -103,16 +104,13 @@ def vertical_shifr(message):
     begin = types.KeyboardButton('В начало')
     murkup.add(new_frase, deshefrovka, back, begin)
     msg = bot.send_message(message.chat.id, f'{stroka}', reply_markup=murkup)
-    bot.register_next_step_handler(msg, processing_result)
+    bot.register_next_step_handler(msg, processing_result_shifr_vert)
 
 
-def processing_result(message):
+def processing_result_shifr_vert(message):
     if message.text == 'Новая фраза':
         msg = bot.send_message(message.chat.id, 'Введите фразу')
         bot.register_next_step_handler(msg, vertical_shifr)
-    elif message.text == 'Новая фраза ':
-        msg = bot.send_message(message.chat.id, 'Введите фразу')
-        bot.register_next_step_handler(msg, meandr_shifr)
     elif message.text == 'Дешифровать':
         vertical_deshifr(message)
     elif message.text == 'Назад':
@@ -135,7 +133,7 @@ def vertical_deshifr(message):
     begin = types.KeyboardButton('В начало')
     murkup.add(new_frase, deshefrovka, back, begin)
     msg = bot.send_message(message.chat.id, f'{stroka}', reply_markup=murkup)
-    bot.register_next_step_handler(msg, processing_result)
+    bot.register_next_step_handler(msg, processing_result_shifr_vert)
 
 
 def meandr_shifr(message):
@@ -144,14 +142,42 @@ def meandr_shifr(message):
     global stroka
     stroka = "".join(full_massiv)
     murkup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
-    new_frase = types.KeyboardButton('Новая фраза ')
+    new_frase = types.KeyboardButton('Новая фраза')
     deshefrovka = types.KeyboardButton('Дешифровать')
     back = types.KeyboardButton('Назад')
     begin = types.KeyboardButton('В начало')
     murkup.add(new_frase, deshefrovka, back, begin)
     msg = bot.send_message(message.chat.id, f'{stroka}', reply_markup=murkup)
-    bot.register_next_step_handler(msg, processing_result)
+    bot.register_next_step_handler(msg, processing_result_shifr_meandr)
 
+
+def meandr_deshifr(message):
+    global stroka
+    full_massiv = meandr_deshifr_algoritm(stroka)
+    stroka = "".join(full_massiv)
+    murkup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+    new_frase = types.KeyboardButton('Новая фраза')
+    deshefrovka = types.KeyboardButton('Дешифровать')
+    back = types.KeyboardButton('Назад')
+    begin = types.KeyboardButton('В начало')
+    murkup.add(new_frase, deshefrovka, back, begin)
+    msg = bot.send_message(message.chat.id, f'{stroka}', reply_markup=murkup)
+    bot.register_next_step_handler(msg, processing_result_shifr_meandr)
+
+
+def processing_result_shifr_meandr(message):
+    if message.text == 'Новая фраза':
+        msg = bot.send_message(message.chat.id, 'Введите фразу')
+        bot.register_next_step_handler(msg, meandr_shifr)
+    elif message.text == 'Дешифровать':
+        meandr_deshifr(message)
+    elif message.text == 'Назад':
+        shifrovanie_choose2(message)
+    elif message.text == 'В начало':
+        start(message)
+    else:
+        bot.send_message(message.chat.id, 'Неверно. Давайте попробуем заново')
+        start(message)
 
 def deshifrovanie_choose(message):
     pass
