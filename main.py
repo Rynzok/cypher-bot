@@ -4,6 +4,7 @@ from vertical_shifrovanie import vertical_shifr_algoritm
 from vertical_shifrovanie import vertical_deshifr_algoritm
 from meandr_shifrovanie import meandr_shifr_algoritm
 from meandr_shifrovanie import meandr_deshifr_algoritm
+from document_processing import getting_text_from_a_document
 
 bot = telebot.TeleBot('6224570536:AAFi5BRh9OUwi3CwJqxSg5TObeOSbBNf3DE')
 
@@ -83,7 +84,7 @@ def shifrovanie_choose2(message):
 
 def shifrovanie(message):
     if message.text == 'Вертикальная':
-        msg = bot.send_message(message.chat.id, 'Введите фразу')
+        msg = bot.send_message(message.chat.id, 'Введите фразу или документ')
         bot.register_next_step_handler(msg, vertical_shifr)
     elif message.text == 'Меандровая':
         msg = bot.send_message(message.chat.id, 'Введите фразу')
@@ -93,7 +94,19 @@ def shifrovanie(message):
 
 
 def vertical_shifr(message):
-    message_no_space = message.text.replace(" ", "")
+    if message.document.file_size > 1:
+        bot.send_message(message.chat.id, 'Это документ')
+        file_info = bot.get_file(message.document.file_id)
+        downloaded_file = bot.download_file(file_info.file_path)
+
+        src = 'documents/' + message.document.file_name
+        with open(src, 'wb') as new_file:
+            new_file.write(downloaded_file)
+        message_no_space = getting_text_from_a_document(src).replace(" ", "")
+
+    else:
+        message_no_space = message.text.replace(" ", "")
+
     full_massiv = vertical_shifr_algoritm(message_no_space)
     global stroka
     stroka = "".join(full_massiv)
@@ -178,6 +191,7 @@ def processing_result_shifr_meandr(message):
     else:
         bot.send_message(message.chat.id, 'Неверно. Давайте попробуем заново')
         start(message)
+
 
 def deshifrovanie_choose(message):
     pass
