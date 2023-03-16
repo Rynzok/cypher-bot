@@ -5,12 +5,15 @@ from vertical_shifrovanie import vertical_deshifr_algoritm
 from meandr_shifrovanie import meandr_shifr_algoritm
 from meandr_shifrovanie import meandr_deshifr_algoritm
 from document_processing import getting_text_from_a_document
+from document_processing import writing_text_to_a_document
+
 
 bot = telebot.TeleBot('6224570536:AAFi5BRh9OUwi3CwJqxSg5TObeOSbBNf3DE')
 
 stroka = ""
 
 
+# Начало работы. Две кнопки выбора. Реализованно пока только шифрование
 @bot.message_handler(commands=['start'])
 def start(message):
     murkup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
@@ -21,6 +24,7 @@ def start(message):
     bot.register_next_step_handler(msg, user_answer)
 
 
+# Анализ ответа пользователя с дальнейшим переходам в другой блок.
 def user_answer(message):
     if message.text == 'Шифрование' or message.text == 'назад':
         murkup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
@@ -40,6 +44,7 @@ def user_answer(message):
         bot.register_next_step_handler(msg, deshifrovanie_choose)
 
 
+# Выбранно шифрование. Выбор его типа.
 def shifrovanie_choose(message):
     if message.text == 'Перестановка' or message.text == 'Назад':
         murkup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
@@ -61,6 +66,7 @@ def shifrovanie_choose(message):
         start(message)
 
 
+# Выбор конкретного способа шифрования
 def shifrovanie_choose2(message):
     if message.text == 'Простая' or message.text == 'Назад':
         murkup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
@@ -82,6 +88,7 @@ def shifrovanie_choose2(message):
         user_answer(message)
 
 
+# Выбор сделан. Отправка сообщения о вводе текса для шифрования
 def shifrovanie(message):
     if message.text == 'Вертикальная':
         msg = bot.send_message(message.chat.id, 'Введите фразу или документ')
@@ -93,33 +100,49 @@ def shifrovanie(message):
         shifrovanie_choose(message)
 
 
+# Осущесвтление вертикального шифрования и создание последующего выбора
 def vertical_shifr(message):
-    if message.document.file_size > 1:
-        bot.send_message(message.chat.id, 'Это документ')
-        file_info = bot.get_file(message.document.file_id)
-        downloaded_file = bot.download_file(file_info.file_path)
-
-        src = 'documents/' + message.document.file_name
-        with open(src, 'wb') as new_file:
-            new_file.write(downloaded_file)
-        message_no_space = getting_text_from_a_document(src).replace(" ", "")
-
-    else:
+    if message.document:
+        vertical_shifr_doc(message)
+    elif message.text:
         message_no_space = message.text.replace(" ", "")
+        full_massiv = vertical_shifr_algoritm(message_no_space)
+        global stroka
+        stroka = "".join(full_massiv)
+        murkup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
+        new_frase = types.KeyboardButton('Новая фраза')
+        deshefrovka = types.KeyboardButton('Дешифровать')
+        back = types.KeyboardButton('Назад')
+        begin = types.KeyboardButton('В начало')
+        murkup.add(new_frase, deshefrovka, back, begin)
+        msg = bot.send_message(message.chat.id, f'{stroka}', reply_markup=murkup)
+        bot.register_next_step_handler(msg, processing_result_shifr_vert)
 
+
+def vertical_shifr_doc(message):
+    bot.send_message(message.chat.id, 'Это документ')
+    file_info = bot.get_file(message.document.file_id)
+    downloaded_file = bot.download_file(file_info.file_path)
+
+    src = 'documents/' + message.document.file_name
+    with open(src, 'wb+') as new_file:
+        new_file.write(downloaded_file)
+    message_no_space = getting_text_from_a_document(src).replace(" ", "")
     full_massiv = vertical_shifr_algoritm(message_no_space)
     global stroka
     stroka = "".join(full_massiv)
+    writing_text_to_a_document(src, stroka)
     murkup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
     new_frase = types.KeyboardButton('Новая фраза')
     deshefrovka = types.KeyboardButton('Дешифровать')
     back = types.KeyboardButton('Назад')
     begin = types.KeyboardButton('В начало')
     murkup.add(new_frase, deshefrovka, back, begin)
-    msg = bot.send_message(message.chat.id, f'{stroka}', reply_markup=murkup)
+    msg = bot.send_document(message.chat.id, document=open(src, 'rb'), reply_markup=murkup)
     bot.register_next_step_handler(msg, processing_result_shifr_vert)
 
 
+# Обработчик выбора пользователя после вертикального шифрования
 def processing_result_shifr_vert(message):
     if message.text == 'Новая фраза':
         msg = bot.send_message(message.chat.id, 'Введите фразу')
@@ -135,6 +158,7 @@ def processing_result_shifr_vert(message):
         start(message)
 
 
+# Реализация вертикального дешифрования
 def vertical_deshifr(message):
     global stroka
     full_massiv = vertical_deshifr_algoritm(stroka)
@@ -149,6 +173,7 @@ def vertical_deshifr(message):
     bot.register_next_step_handler(msg, processing_result_shifr_vert)
 
 
+# Реализация меандрового шифрования
 def meandr_shifr(message):
     message_no_space = message.text.replace(" ", "")
     full_massiv = meandr_shifr_algoritm(message_no_space)
@@ -164,6 +189,7 @@ def meandr_shifr(message):
     bot.register_next_step_handler(msg, processing_result_shifr_meandr)
 
 
+# Реализация меандрового дешифрования
 def meandr_deshifr(message):
     global stroka
     full_massiv = meandr_deshifr_algoritm(stroka)
@@ -178,6 +204,7 @@ def meandr_deshifr(message):
     bot.register_next_step_handler(msg, processing_result_shifr_meandr)
 
 
+# Обработчик выбора пользователя после меандрового шифрования
 def processing_result_shifr_meandr(message):
     if message.text == 'Новая фраза':
         msg = bot.send_message(message.chat.id, 'Введите фразу')
