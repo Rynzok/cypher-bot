@@ -1,4 +1,5 @@
 import telebot
+from telebot import types
 from vertical_shifrovanie import vertical_shifr_algoritm
 from vertical_shifrovanie import vertical_deshifr_algoritm
 from meandr_shifrovanie import meandr_shifr_algoritm
@@ -8,6 +9,8 @@ from document_processing import writing_text_to_a_document
 from spiral_shifrivanie import spiral_shifr_algoritm
 from spiral_shifrivanie import spiral_deshifr_algoritm
 from murkup_creation import murkup_creation
+from numeric_key_shifrovanie import numeric_key_shifr_algoritm
+from faind_dels import find_all_dels
 
 
 bot = telebot.TeleBot('6224570536:AAFi5BRh9OUwi3CwJqxSg5TObeOSbBNf3DE')
@@ -52,7 +55,8 @@ def shifrovanie_choose(message):
 # Выбор конкретного способа шифрования
 def shifrovanie_choose2(message):
     if message.text == 'Простая' or message.text == 'Назад':
-        murkup = murkup_creation(button_names=['Вертикальная', 'Меандровая', 'Спиральная', 'Назад'])
+        murkup = murkup_creation(button_names=['Вертикальная', 'Меандровая', 'Спиральная', 'По числовому ключу',
+                                               'Назад'])
         msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
     elif message.text == 'Сложная':
@@ -69,11 +73,14 @@ def shifrovanie(message):
         msg = bot.send_message(message.chat.id, 'Введите фразу или документ')
         bot.register_next_step_handler(msg, vertical_shifr)
     elif message.text == 'Меандровая':
-        msg = bot.send_message(message.chat.id, 'Введите фразу')
+        msg = bot.send_message(message.chat.id, 'Введите фразу или документ')
         bot.register_next_step_handler(msg, meandr_shifr)
     elif message.text == 'Спиральная':
-        msg = bot.send_message(message.chat.id, 'Введите фразу')
+        msg = bot.send_message(message.chat.id, 'Введите фразу или документ')
         bot.register_next_step_handler(msg, spiral_shifr)
+    elif message.text == 'По числовому ключу':
+        msg = bot.send_message(message.chat.id, 'Введите фразу или документ')
+        bot.register_next_step_handler(msg, numeric_key_shifr)
     elif message.text == 'Назад':
         shifrovanie_choose(message)
 
@@ -223,6 +230,56 @@ def processing_result_shifr_spiral(message):
     if message.text == 'Новая фраза':
         msg = bot.send_message(message.chat.id, 'Введите фразу')
         bot.register_next_step_handler(msg, spiral_shifr)
+    elif message.text == 'Дешифровать':
+        spiral_deshifr(message)
+    elif message.text == 'Назад':
+        shifrovanie_choose2(message)
+    elif message.text == 'В начало':
+        start(message)
+    else:
+        bot.send_message(message.chat.id, 'Неверно. Давайте попробуем заново')
+        start(message)
+
+
+def numeric_key_shifr(message):
+    murkup = types.ReplyKeyboardRemove()
+    if message.document:
+        bot.send_message(message.chat.id, 'Это документ')
+        file_info = bot.get_file(message.document.file_id)
+        downloaded_file = bot.download_file(file_info.file_path)
+
+        src = 'documents/' + message.document.file_name
+        with open(src, 'wb+') as new_file:
+            new_file.write(downloaded_file)
+        global stroka
+        stroka = getting_text_from_a_document(src).replace(" ", "")
+        lenght = int(len(stroka))
+        size = find_all_dels(lenght)
+        msg = bot.send_message(message.chat.id, f'Введите последовательность из {size[0]} НЕ повторяющихся числел',
+                               reply_markup=murkup)
+    else:
+        stroka = message.text.replace(" ", "")
+        lenght = int(len(stroka))
+        size = find_all_dels(lenght)
+        msg = bot.send_message(message.chat.id, f'Введите последовательность из {size[0]} НЕ повторяющихся числел',
+                               reply_markup=murkup)
+    bot.register_next_step_handler(msg, numeric_key_shifr_step_2)
+
+
+def numeric_key_shifr_step_2(message):
+    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    numeric_key = message.text
+    global stroka
+    full_massiv = numeric_key_shifr_algoritm(stroka, numeric_key)
+    stroka = "".join(full_massiv)
+    msg = bot.send_message(message.chat.id, f'{stroka}', reply_markup=murkup)
+    bot.register_next_step_handler(msg, processing_result_shifr_numeric_key)
+
+
+def processing_result_shifr_numeric_key(message):
+    if message.text == 'Новая фраза':
+        msg = bot.send_message(message.chat.id, 'Введите фразу')
+        bot.register_next_step_handler(msg, numeric_key_shifr)
     elif message.text == 'Дешифровать':
         spiral_deshifr(message)
     elif message.text == 'Назад':
