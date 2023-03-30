@@ -101,10 +101,10 @@ def shifrovanie_choose2(message):
 # Выбор сделан. Отправка сообщения о вводе текса для шифрования
 def shifrovanie(message):
     if message.text == 'Назад':
-        user_answer(message)
+        shifrovanie_choose(message)
+        return
     murkup = types.ReplyKeyboardRemove()
-    global message_encrypt
-    message_encrypt = MessageEncryption(message.text)
+    message_encrypt.typy_encrypt = message.text
     msg = bot.send_message(message.chat.id, 'Введите фразу или документ', reply_markup=murkup)
     bot.register_next_step_handler(msg, implementation_of_encryption)
 
@@ -122,18 +122,34 @@ def implementation_of_encryption(message):
         message_encrypt.text = getting_text_from_a_document(src).replace(" ", "")
         message_encrypt.get_text(message.text, 'Документ')
     else:
-        message_encrypt.get_text(message.text, 'Текст')
+        message_encrypt.get_text(message.text.replace(" ", ""), 'Текст')
 
     if message_encrypt.typy_encrypt == 'Вертикальная':
-        message_encrypt.get_text_encrypted("".join(vertical_shifr_algoritm(message_encrypt.text.replace(" ", ""))))
+        message_encrypt.get_text_encrypted("".join(vertical_shifr_algoritm(message_encrypt.text)))
     elif message_encrypt.typy_encrypt == 'Меандровая':
-        message_encrypt.get_text_encrypted("".join(meandr_shifr_algoritm(message_encrypt.text.replace(" ", ""))))
+        message_encrypt.get_text_encrypted("".join(meandr_shifr_algoritm(message_encrypt.text)))
     elif message_encrypt.typy_encrypt == 'Спиральная':
-        message_encrypt.get_text_encrypted("".join(spiral_shifr_algoritm(message_encrypt.text.replace(" ", ""))))
+        message_encrypt.get_text_encrypted("".join(spiral_shifr_algoritm(message_encrypt.text)))
     elif message_encrypt.typy_encrypt == 'По числовому ключу':
-        numeric_key_shifr_step_2(message)
-    elif message.text == 'Назад':
-        shifrovanie_choose(message)
+        murkup2 = types.ReplyKeyboardRemove()
+        size = find_all_dels(int(len(message_encrypt.text)))
+        nsg = bot.send_message(message.chat.id, f'Введите последовательность из {size[0]} НЕ повторяющихся числел',
+                               reply_markup=murkup2)
+        bot.register_next_step_handler(nsg, numeric_key_shifr_step_2)
+        return
+    msg = bot.send_message(message.chat.id, f'Зашифровал:{message_encrypt.text_encrypted}', reply_markup=murkup)
+    bot.register_next_step_handler(msg, processing_result_encrypt)
+
+
+def numeric_key_shifr_step_2(message):
+    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    message_encrypt.get_n_key(message.text)
+    full_massiv = numeric_key_shifr_algoritm(message_encrypt.text, message_encrypt.n_key)
+    stroka = "".join(full_massiv)
+    stroka = stroka.replace("[", "")
+    stroka = stroka.replace("]", "")
+    stroka = stroka.replace("'", "")
+    message_encrypt.text_encrypted = stroka
     msg = bot.send_message(message.chat.id, f'{message_encrypt.text_encrypted}', reply_markup=murkup)
     bot.register_next_step_handler(msg, processing_result_encrypt)
 
@@ -177,27 +193,6 @@ def decryption_implementation(message):
         shifrovanie_choose(message)
     msg = bot.send_message(message.chat.id, f'{message_encrypt.text}', reply_markup=murkup)
     bot.register_next_step_handler(msg, processing_result_encrypt)
-
-
-def numeric_key_shifr_step_2(message):
-    murkup = types.ReplyKeyboardRemove()
-    lenght = int(len(message_encrypt.text))
-    size = find_all_dels(lenght)
-    nsg = bot.send_message(message.chat.id, f'Введите последовательность из {size[0]} НЕ повторяющихся числел',
-                           reply_markup=murkup)
-    bot.register_next_step_handler(nsg, numeric_key_shifr_step_3)
-
-
-def numeric_key_shifr_step_3(message):
-    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
-    message_encrypt.get_n_key(message.text)
-    full_massiv = numeric_key_shifr_algoritm(message_encrypt.text, message_encrypt.n_key)
-    stroka = "".join(full_massiv)
-    stroka = stroka.replace("[", "")
-    stroka = stroka.replace("]", "")
-    stroka = stroka.replace("'", "")
-    msg = bot.send_message(message.chat.id, f'{stroka}', reply_markup=murkup)
-    bot.register_next_step_handler(msg, decryption_implementation)
 
 
 def deshifrovanie_choose(message):
