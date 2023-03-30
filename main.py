@@ -5,7 +5,7 @@ from vertical_shifrovanie import vertical_deshifr_algoritm
 from meandr_shifrovanie import meandr_shifr_algoritm
 from meandr_shifrovanie import meandr_deshifr_algoritm
 from document_processing import getting_text_from_a_document
-from document_processing import writing_text_to_a_document
+# from document_processing import writing_text_to_a_document
 from spiral_shifrivanie import spiral_shifr_algoritm
 from spiral_shifrivanie import spiral_deshifr_algoritm
 from murkup_creation import murkup_creation
@@ -14,10 +14,39 @@ from numeric_key_shifrovanie import numeric_key_deshifr_algoritm
 from faind_dels import find_all_dels
 
 
-
 bot = telebot.TeleBot('6224570536:AAFi5BRh9OUwi3CwJqxSg5TObeOSbBNf3DE')
 
-stroka = ""
+
+class MessageEncryption:
+    def __init__(self, type_encrypt):
+        self.typy_encrypt = type_encrypt
+        self.text_or_doc = ''
+        self.text = ''
+        self.text_encrypted = ''
+        self.rows = 0
+        self.columns = 0
+        self.n_key = ''
+        self.v_key = ''
+
+    def get_text(self, text, type_text):
+        self.text = text
+        self.text_or_doc = type_text
+
+    def get_text_encrypted(self, text_encrypted):
+        self.text_encrypted = text_encrypted
+
+    def get_sides(self, rows, columns):
+        self.rows = rows
+        self.columns = columns
+
+    def get_n_key(self, n_key):
+        self.n_key = n_key
+
+    def get_v_key(self, v_key):
+        self.v_key = v_key
+
+
+message_encrypt = MessageEncryption("")
 
 
 # Начало работы. Две кнопки выбора. Реализованно пока только шифрование
@@ -30,7 +59,7 @@ def start(message):
 
 # Анализ ответа пользователя с дальнейшим переходам в другой блок.
 def user_answer(message):
-    if message.text == 'Шифрование' or message.text == 'назад':
+    if message.text == 'Шифрование' or message.text == 'назад' or message.text == 'Назад':
         murkup = murkup_creation(button_names=['Перестановка', 'Замена', 'назад'])
         msg = bot.send_message(message.chat.id, 'Каким способом?', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie_choose)
@@ -71,57 +100,50 @@ def shifrovanie_choose2(message):
 
 # Выбор сделан. Отправка сообщения о вводе текса для шифрования
 def shifrovanie(message):
+    if message.text == 'Назад':
+        user_answer(message)
     murkup = types.ReplyKeyboardRemove()
-    if message.text == 'Вертикальная':
-        msg = bot.send_message(message.chat.id, 'Введите фразу или документ', reply_markup=murkup)
-        bot.register_next_step_handler(msg, vertical_shifr)
-    elif message.text == 'Меандровая':
-        msg = bot.send_message(message.chat.id, 'Введите фразу или документ', reply_markup=murkup)
-        bot.register_next_step_handler(msg, meandr_shifr)
-    elif message.text == 'Спиральная':
-        msg = bot.send_message(message.chat.id, 'Введите фразу или документ', reply_markup=murkup)
-        bot.register_next_step_handler(msg, spiral_shifr)
-    elif message.text == 'По числовому ключу':
-        msg = bot.send_message(message.chat.id, 'Введите фразу или документ', reply_markup=murkup)
-        bot.register_next_step_handler(msg, numeric_key_shifr)
+    global message_encrypt
+    message_encrypt = MessageEncryption(message.text)
+    msg = bot.send_message(message.chat.id, 'Введите фразу или документ', reply_markup=murkup)
+    bot.register_next_step_handler(msg, implementation_of_encryption)
+
+
+def implementation_of_encryption(message):
+    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    if message.document:
+        bot.send_message(message.chat.id, 'Это документ')
+        file_info = bot.get_file(message.document.file_id)
+        downloaded_file = bot.download_file(file_info.file_path)
+
+        src = 'documents/' + message.document.file_name
+        with open(src, 'wb+') as new_file:
+            new_file.write(downloaded_file)
+        message_encrypt.text = getting_text_from_a_document(src).replace(" ", "")
+        message_encrypt.get_text(message.text, 'Документ')
+    else:
+        message_encrypt.get_text(message.text, 'Текст')
+
+    if message_encrypt.typy_encrypt == 'Вертикальная':
+        message_encrypt.get_text_encrypted("".join(vertical_shifr_algoritm(message_encrypt.text.replace(" ", ""))))
+    elif message_encrypt.typy_encrypt == 'Меандровая':
+        message_encrypt.get_text_encrypted("".join(meandr_shifr_algoritm(message_encrypt.text.replace(" ", ""))))
+    elif message_encrypt.typy_encrypt == 'Спиральная':
+        message_encrypt.get_text_encrypted("".join(spiral_shifr_algoritm(message_encrypt.text.replace(" ", ""))))
+    elif message_encrypt.typy_encrypt == 'По числовому ключу':
+        numeric_key_shifr_step_2(message)
     elif message.text == 'Назад':
         shifrovanie_choose(message)
+    msg = bot.send_message(message.chat.id, f'{message_encrypt.text_encrypted}', reply_markup=murkup)
+    bot.register_next_step_handler(msg, processing_result_encrypt)
 
 
-# Осущесвтление вертикального шифрования и создание последующего выбора
-def vertical_shifr(message):
-    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
-
-    if message.document:
-        bot.send_message(message.chat.id, 'Это документ')
-        file_info = bot.get_file(message.document.file_id)
-        downloaded_file = bot.download_file(file_info.file_path)
-
-        src = 'documents/' + message.document.file_name
-        with open(src, 'wb+') as new_file:
-            new_file.write(downloaded_file)
-        message_no_space = getting_text_from_a_document(src).replace(" ", "")
-        full_massiv = vertical_shifr_algoritm(message_no_space)
-        global stroka
-        stroka = "".join(full_massiv)
-        writing_text_to_a_document(src, stroka)
-        msg = bot.send_document(message.chat.id, document=open(src, 'rb'), reply_markup=murkup)
-    else:
-        message_no_space = message.text.replace(" ", "")
-        full_massiv = vertical_shifr_algoritm(message_no_space)
-        # global stroka
-        stroka = "".join(full_massiv)
-        msg = bot.send_message(message.chat.id, f'{stroka}', reply_markup=murkup)
-    bot.register_next_step_handler(msg, processing_result_shifr_vert)
-
-
-# Обработчик выбора пользователя после вертикального шифрования
-def processing_result_shifr_vert(message):
+def processing_result_encrypt(message):
     if message.text == 'Новая фраза':
         msg = bot.send_message(message.chat.id, 'Введите фразу')
-        bot.register_next_step_handler(msg, vertical_shifr)
+        bot.register_next_step_handler(msg, implementation_of_encryption)
     elif message.text == 'Дешифровать':
-        vertical_deshifr(message)
+        decryption_implementation(message)
     elif message.text == 'Назад':
         shifrovanie_choose2(message)
     elif message.text == 'В начало':
@@ -131,21 +153,9 @@ def processing_result_shifr_vert(message):
         start(message)
 
 
-# Реализация вертикального дешифрования
-def vertical_deshifr(message):
-    global stroka
-    full_massiv = vertical_deshifr_algoritm(stroka)
-    stroka = "".join(full_massiv)
-    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
-    msg = bot.send_message(message.chat.id, f'{stroka}', reply_markup=murkup)
-    bot.register_next_step_handler(msg, processing_result_shifr_vert)
-
-
-# Реализация меандрового шифрования
-def meandr_shifr(message):
-    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
-
-    if message.document:
+def decryption_implementation(message):
+    murkup = murkup_creation(button_names=['Новая фраза', 'Назад', 'В начало'])
+    if message_encrypt.text_or_doc == 'Документ':
         bot.send_message(message.chat.id, 'Это документ')
         file_info = bot.get_file(message.document.file_id)
         downloaded_file = bot.download_file(file_info.file_path)
@@ -153,160 +163,41 @@ def meandr_shifr(message):
         src = 'documents/' + message.document.file_name
         with open(src, 'wb+') as new_file:
             new_file.write(downloaded_file)
-        message_no_space = getting_text_from_a_document(src).replace(" ", "")
+        message_encrypt.text = getting_text_from_a_document(src).replace(" ", "")
 
-        full_massiv = meandr_shifr_algoritm(message_no_space)
-        global stroka
-        stroka = "".join(full_massiv)
-        writing_text_to_a_document(src, stroka)
-        msg = bot.send_document(message.chat.id, document=open(src, 'rb'), reply_markup=murkup)
-    else:
-        message_no_space = message.text.replace(" ", "")
-        full_massiv = meandr_shifr_algoritm(message_no_space)
-        stroka = "".join(full_massiv)
-        msg = bot.send_message(message.chat.id, f'{stroka}', reply_markup=murkup)
-    bot.register_next_step_handler(msg, processing_result_shifr_meandr)
-
-
-# Реализация меандрового дешифрования
-def meandr_deshifr(message):
-    global stroka
-    full_massiv = meandr_deshifr_algoritm(stroka)
-    stroka = "".join(full_massiv)
-    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
-    msg = bot.send_message(message.chat.id, f'{stroka}', reply_markup=murkup)
-    bot.register_next_step_handler(msg, processing_result_shifr_meandr)
-
-
-# Обработчик выбора пользователя после меандрового шифрования
-def processing_result_shifr_meandr(message):
-    if message.text == 'Новая фраза':
-        msg = bot.send_message(message.chat.id, 'Введите фразу')
-        bot.register_next_step_handler(msg, meandr_shifr)
-    elif message.text == 'Дешифровать':
-        meandr_deshifr(message)
+    if message_encrypt.typy_encrypt == 'Вертикальная':
+        message_encrypt.get_text_encrypted("".join(vertical_deshifr_algoritm(message_encrypt.text.replace(" ", ""))))
+    elif message.text == 'Меандровая':
+        message_encrypt.get_text_encrypted("".join(meandr_deshifr_algoritm(message_encrypt.text.replace(" ", ""))))
+    elif message.text == 'Спиральная':
+        message_encrypt.get_text_encrypted("".join(spiral_deshifr_algoritm(message_encrypt.text.replace(" ", ""))))
+    elif message.text == 'По числовому ключу':
+        message_encrypt.get_text_encrypted("".join(numeric_key_deshifr_algoritm(message_encrypt.text.replace(" ", ""))))
     elif message.text == 'Назад':
-        shifrovanie_choose2(message)
-    elif message.text == 'В начало':
-        start(message)
-    else:
-        bot.send_message(message.chat.id, 'Неверно. Давайте попробуем заново')
-        start(message)
-
-
-def spiral_shifr(message):
-    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
-
-    if message.document:
-        bot.send_message(message.chat.id, 'Это документ')
-        file_info = bot.get_file(message.document.file_id)
-        downloaded_file = bot.download_file(file_info.file_path)
-
-        src = 'documents/' + message.document.file_name
-        with open(src, 'wb+') as new_file:
-            new_file.write(downloaded_file)
-        message_no_space = getting_text_from_a_document(src).replace(" ", "")
-        full_massiv = spiral_shifr_algoritm(message_no_space)
-        global stroka
-        stroka = "".join(full_massiv)
-        writing_text_to_a_document(src, stroka)
-        msg = bot.send_document(message.chat.id, document=open(src, 'rb'), reply_markup=murkup)
-    else:
-        message_no_space = message.text.replace(" ", "")
-        full_massiv = spiral_shifr_algoritm(message_no_space)
-        stroka = "".join(full_massiv)
-        msg = bot.send_message(message.chat.id, f'{stroka}', reply_markup=murkup)
-    bot.register_next_step_handler(msg, processing_result_shifr_spiral)
-
-
-def spiral_deshifr(message):
-    global stroka
-    full_massiv = spiral_deshifr_algoritm(stroka)
-    stroka = "".join(full_massiv)
-    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
-    msg = bot.send_message(message.chat.id, f'{stroka}', reply_markup=murkup)
-    bot.register_next_step_handler(msg, processing_result_shifr_spiral)
-
-
-# Обработчик выбора пользователя после меандрового шифрования
-def processing_result_shifr_spiral(message):
-    if message.text == 'Новая фраза':
-        msg = bot.send_message(message.chat.id, 'Введите фразу')
-        bot.register_next_step_handler(msg, spiral_shifr)
-    elif message.text == 'Дешифровать':
-        spiral_deshifr(message)
-    elif message.text == 'Назад':
-        shifrovanie_choose2(message)
-    elif message.text == 'В начало':
-        start(message)
-    else:
-        bot.send_message(message.chat.id, 'Неверно. Давайте попробуем заново')
-        start(message)
-
-
-def numeric_key_shifr(message):
-    murkup = types.ReplyKeyboardRemove()
-    if message.document:
-        bot.send_message(message.chat.id, 'Это документ')
-        file_info = bot.get_file(message.document.file_id)
-        downloaded_file = bot.download_file(file_info.file_path)
-
-        src = 'documents/' + message.document.file_name
-        with open(src, 'wb+') as new_file:
-            new_file.write(downloaded_file)
-        global stroka
-        stroka = getting_text_from_a_document(src).replace(" ", "")
-        lenght = int(len(stroka))
-        size = find_all_dels(lenght)
-        msg = bot.send_message(message.chat.id, f'Введите последовательность из {size[0]} НЕ повторяющихся числел',
-                               reply_markup=murkup)
-    else:
-        stroka = message.text.replace(" ", "")
-        lenght = int(len(stroka))
-        size = find_all_dels(lenght)
-        msg = bot.send_message(message.chat.id, f'Введите последовательность из {size[0]} НЕ повторяющихся числел',
-                               reply_markup=murkup)
-    bot.register_next_step_handler(msg, numeric_key_shifr_step_2)
+        shifrovanie_choose(message)
+    msg = bot.send_message(message.chat.id, f'{message_encrypt.text}', reply_markup=murkup)
+    bot.register_next_step_handler(msg, processing_result_encrypt)
 
 
 def numeric_key_shifr_step_2(message):
+    murkup = types.ReplyKeyboardRemove()
+    lenght = int(len(message_encrypt.text))
+    size = find_all_dels(lenght)
+    nsg = bot.send_message(message.chat.id, f'Введите последовательность из {size[0]} НЕ повторяющихся числел',
+                           reply_markup=murkup)
+    bot.register_next_step_handler(nsg, numeric_key_shifr_step_3)
+
+
+def numeric_key_shifr_step_3(message):
     murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
-    numeric_key = message.text
-    global stroka
-    full_massiv = numeric_key_shifr_algoritm(stroka, numeric_key)
+    message_encrypt.get_n_key(message.text)
+    full_massiv = numeric_key_shifr_algoritm(message_encrypt.text, message_encrypt.n_key)
     stroka = "".join(full_massiv)
     stroka = stroka.replace("[", "")
     stroka = stroka.replace("]", "")
     stroka = stroka.replace("'", "")
     msg = bot.send_message(message.chat.id, f'{stroka}', reply_markup=murkup)
-    bot.register_next_step_handler(msg, processing_result_shifr_numeric_key)
-
-
-def numeric_key_deshifr(message):
-    global stroka
-    full_massiv = numeric_key_deshifr_algoritm(stroka)
-    stroka = "".join(full_massiv)
-    stroka = stroka.replace("[", "")
-    stroka = stroka.replace("]", "")
-    stroka = stroka.replace("'", "")
-    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
-    msg = bot.send_message(message.chat.id, f'{stroka}', reply_markup=murkup)
-    bot.register_next_step_handler(msg, processing_result_shifr_numeric_key)
-
-
-def processing_result_shifr_numeric_key(message):
-    if message.text == 'Новая фраза':
-        msg = bot.send_message(message.chat.id, 'Введите фразу')
-        bot.register_next_step_handler(msg, numeric_key_shifr)
-    elif message.text == 'Дешифровать':
-        numeric_key_deshifr(message)
-    elif message.text == 'Назад':
-        shifrovanie_choose2(message)
-    elif message.text == 'В начало':
-        start(message)
-    else:
-        bot.send_message(message.chat.id, 'Неверно. Давайте попробуем заново')
-        start(message)
+    bot.register_next_step_handler(msg, decryption_implementation)
 
 
 def deshifrovanie_choose(message):
