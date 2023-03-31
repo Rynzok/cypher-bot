@@ -12,6 +12,7 @@ from murkup_creation import murkup_creation
 from numeric_key_shifrovanie import numeric_key_shifr_algoritm
 from numeric_key_shifrovanie import numeric_key_deshifr_algoritm
 from faind_dels import find_all_dels
+from sortirivka import fast_sort
 
 
 bot = telebot.TeleBot('6224570536:AAFi5BRh9OUwi3CwJqxSg5TObeOSbBNf3DE')
@@ -27,6 +28,7 @@ class MessageEncryption:
         self.columns = 0
         self.n_key = ''
         self.v_key = ''
+        self.n_key_ascending = []
 
     def get_text(self, text, type_text):
         self.text = text
@@ -41,6 +43,10 @@ class MessageEncryption:
 
     def get_n_key(self, n_key):
         self.n_key = n_key
+        array_of_numbers = [0] * len(n_key)
+        for j in range(len(n_key)):
+            array_of_numbers[j] = int(n_key[j])
+        self.n_key_ascending = fast_sort(array_of_numbers)
 
     def get_v_key(self, v_key):
         self.v_key = v_key
@@ -144,7 +150,8 @@ def implementation_of_encryption(message):
 def numeric_key_shifr_step_2(message):
     murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
     message_encrypt.get_n_key(message.text)
-    full_massiv = numeric_key_shifr_algoritm(message_encrypt.text, message_encrypt.n_key)
+    full_massiv = numeric_key_shifr_algoritm(message_encrypt.text, message_encrypt.n_key,
+                                             message_encrypt.n_key_ascending)
     stroka = "".join(full_massiv)
     stroka = stroka.replace("[", "")
     stroka = stroka.replace("]", "")
@@ -188,7 +195,9 @@ def decryption_implementation(message):
     elif message.text == 'Спиральная':
         message_encrypt.get_text_encrypted("".join(spiral_deshifr_algoritm(message_encrypt.text.replace(" ", ""))))
     elif message.text == 'По числовому ключу':
-        message_encrypt.get_text_encrypted("".join(numeric_key_deshifr_algoritm(message_encrypt.text.replace(" ", ""))))
+        message_encrypt.get_text_encrypted("".join(numeric_key_deshifr_algoritm(message_encrypt.text.replace(" ", ""),
+                                                                                message_encrypt.n_key,
+                                                                                message_encrypt.n_key_ascending)))
     elif message.text == 'Назад':
         shifrovanie_choose(message)
     msg = bot.send_message(message.chat.id, f'{message_encrypt.text}', reply_markup=murkup)
