@@ -5,7 +5,7 @@ from vertical_shifrovanie import vertical_deshifr_algoritm
 from meandr_shifrovanie import meandr_shifr_algoritm
 from meandr_shifrovanie import meandr_deshifr_algoritm
 from document_processing import getting_text_from_a_document
-# from document_processing import writing_text_to_a_document
+from document_processing import writing_text_to_a_document
 from spiral_shifrivanie import spiral_shifr_algoritm
 from spiral_shifrivanie import spiral_deshifr_algoritm
 from murkup_creation import murkup_creation
@@ -29,6 +29,7 @@ class MessageEncryption:
         self.n_key = ''
         self.v_key = ''
         self.n_key_ascending = []
+        self.src = ''
 
     def get_text(self, text, type_text):
         self.text = text
@@ -122,11 +123,10 @@ def implementation_of_encryption(message):
         file_info = bot.get_file(message.document.file_id)
         downloaded_file = bot.download_file(file_info.file_path)
 
-        src = 'documents/' + message.document.file_name
-        with open(src, 'wb+') as new_file:
+        message_encrypt.src = 'documents/' + message.document.file_name
+        with open(message_encrypt.src, 'wb+') as new_file:
             new_file.write(downloaded_file)
-        message_encrypt.text = getting_text_from_a_document(src).replace(" ", "")
-        message_encrypt.get_text(message.text, 'Документ')
+        message_encrypt.get_text(getting_text_from_a_document(message_encrypt.src).replace(" ", ""), 'Документ')
     else:
         message_encrypt.get_text(message.text.replace(" ", ""), 'Текст')
 
@@ -143,6 +143,11 @@ def implementation_of_encryption(message):
                                reply_markup=murkup2)
         bot.register_next_step_handler(nsg, numeric_key_shifr_step_2)
         return
+    if message_encrypt.text_or_doc == 'Документ':
+        writing_text_to_a_document(message_encrypt.src, message_encrypt.text_encrypted)
+        msg = bot.send_document(message.chat.id, open(f'{message_encrypt.src}', 'rb'), reply_markup=murkup)
+        bot.register_next_step_handler(msg, processing_result_encrypt)
+        return
     msg = bot.send_message(message.chat.id, f'Зашифровал:{message_encrypt.text_encrypted}', reply_markup=murkup)
     bot.register_next_step_handler(msg, processing_result_encrypt)
 
@@ -157,6 +162,11 @@ def numeric_key_shifr_step_2(message):
     stroka = stroka.replace("]", "")
     stroka = stroka.replace("'", "")
     message_encrypt.text_encrypted = stroka
+    if message_encrypt.text_or_doc == 'Документ':
+        writing_text_to_a_document(message_encrypt.src, message_encrypt.text_encrypted)
+        msg = bot.send_document(message.chat.id, open(f'{message_encrypt.src}', 'rb'), reply_markup=murkup)
+        bot.register_next_step_handler(msg, processing_result_encrypt)
+        return
     msg = bot.send_message(message.chat.id, f'{message_encrypt.text_encrypted}', reply_markup=murkup)
     bot.register_next_step_handler(msg, processing_result_encrypt)
 
@@ -180,26 +190,27 @@ def decryption_implementation(message):
     murkup = murkup_creation(button_names=['Новая фраза', 'Назад', 'В начало'])
     if message_encrypt.text_or_doc == 'Документ':
         bot.send_message(message.chat.id, 'Это документ')
-        file_info = bot.get_file(message.document.file_id)
-        downloaded_file = bot.download_file(file_info.file_path)
-
-        src = 'documents/' + message.document.file_name
-        with open(src, 'wb+') as new_file:
-            new_file.write(downloaded_file)
-        message_encrypt.text = getting_text_from_a_document(src).replace(" ", "")
+        open(message_encrypt.src, 'rb+')
+        message_encrypt.text_encrypted = getting_text_from_a_document(message_encrypt.src).replace(" ", "")
 
     if message_encrypt.typy_encrypt == 'Вертикальная':
-        message_encrypt.get_text_encrypted("".join(vertical_deshifr_algoritm(message_encrypt.text.replace(" ", ""))))
+        message_encrypt.text = "".join(vertical_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", "")))
     elif message.text == 'Меандровая':
-        message_encrypt.get_text_encrypted("".join(meandr_deshifr_algoritm(message_encrypt.text.replace(" ", ""))))
+        message_encrypt.text = "".join(meandr_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", "")))
     elif message.text == 'Спиральная':
-        message_encrypt.get_text_encrypted("".join(spiral_deshifr_algoritm(message_encrypt.text.replace(" ", ""))))
+        message_encrypt.text = "".join(spiral_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", "")))
     elif message.text == 'По числовому ключу':
-        message_encrypt.get_text_encrypted("".join(numeric_key_deshifr_algoritm(message_encrypt.text.replace(" ", ""),
-                                                                                message_encrypt.n_key,
-                                                                                message_encrypt.n_key_ascending)))
+        message_encrypt.text = "".join(numeric_key_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", ""),
+                                                                    message_encrypt.n_key,
+                                                                    message_encrypt.n_key_ascending))
     elif message.text == 'Назад':
         shifrovanie_choose(message)
+
+    if message_encrypt.text_or_doc == 'Документ':
+        writing_text_to_a_document(message_encrypt.src, message_encrypt.text)
+        msg = bot.send_document(message.chat.id, open(f'{message_encrypt.src}', 'rb'), reply_markup=murkup)
+        bot.register_next_step_handler(msg, processing_result_encrypt)
+        return
     msg = bot.send_message(message.chat.id, f'{message_encrypt.text}', reply_markup=murkup)
     bot.register_next_step_handler(msg, processing_result_encrypt)
 
