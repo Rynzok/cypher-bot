@@ -1,18 +1,14 @@
 import telebot
 from telebot import types
-from vertical_shifrovanie import vertical_shifr_algoritm
-from vertical_shifrovanie import vertical_deshifr_algoritm
-from meandr_shifrovanie import meandr_shifr_algoritm
-from meandr_shifrovanie import meandr_deshifr_algoritm
-from document_processing import getting_text_from_a_document
-from document_processing import writing_text_to_a_document
-from spiral_shifrivanie import spiral_shifr_algoritm
-from spiral_shifrivanie import spiral_deshifr_algoritm
+from vertical_shifrovanie import vertical_shifr_algoritm, vertical_deshifr_algoritm
+from meandr_shifrovanie import meandr_shifr_algoritm, meandr_deshifr_algoritm
+from document_processing import getting_text_from_a_document, writing_text_to_a_document
+from spiral_shifrivanie import spiral_shifr_algoritm, spiral_deshifr_algoritm
+from numeric_key_shifrovanie import numeric_key_shifr_algoritm, numeric_key_deshifr_algoritm
 from murkup_creation import murkup_creation
-from numeric_key_shifrovanie import numeric_key_shifr_algoritm
-from numeric_key_shifrovanie import numeric_key_deshifr_algoritm
 from faind_dels import find_all_dels
 from sortirivka import fast_sort
+from dictionary import simple_dictionary
 
 
 bot = telebot.TeleBot('6224570536:AAFi5BRh9OUwi3CwJqxSg5TObeOSbBNf3DE')
@@ -51,6 +47,11 @@ class MessageEncryption:
 
     def get_v_key(self, v_key):
         self.v_key = v_key
+        nn_key = [0] * len(v_key)
+        for i in range(len(nn_key)):
+            nn_key[i] = simple_dictionary[v_key[i]]
+        self.n_key = "".join(map(str, nn_key))
+        self.get_n_key(self.n_key)
 
 
 message_encrypt = MessageEncryption("")
@@ -94,7 +95,7 @@ def shifrovanie_choose(message):
 def shifrovanie_choose2(message):
     if message.text == 'Простая' or message.text == 'Назад':
         murkup = murkup_creation(button_names=['Вертикальная', 'Меандровая', 'Спиральная', 'По числовому ключу',
-                                               'Назад'])
+                                               'По буквенному ключу', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
     elif message.text == 'Сложная':
@@ -143,18 +144,29 @@ def implementation_of_encryption(message):
                                reply_markup=murkup2)
         bot.register_next_step_handler(nsg, numeric_key_shifr_step_2)
         return
+    elif message_encrypt.typy_encrypt == 'По буквенному ключу':
+        murkup2 = types.ReplyKeyboardRemove()
+        size = find_all_dels(int(len(message_encrypt.text)))
+        nsg = bot.send_message(message.chat.id, f'Введите последовательность из {size[0]} НЕ одинаковых русских букв',
+                               reply_markup=murkup2)
+        bot.register_next_step_handler(nsg, numeric_key_shifr_step_2)
+        return
+
     if message_encrypt.text_or_doc == 'Документ':
         writing_text_to_a_document(message_encrypt.src, message_encrypt.text_encrypted)
         msg = bot.send_document(message.chat.id, open(f'{message_encrypt.src}', 'rb'), reply_markup=murkup)
         bot.register_next_step_handler(msg, processing_result_encrypt)
         return
-    msg = bot.send_message(message.chat.id, f'Зашифровал:{message_encrypt.text_encrypted}', reply_markup=murkup)
+    msg = bot.send_message(message.chat.id, f'{message_encrypt.text_encrypted}', reply_markup=murkup)
     bot.register_next_step_handler(msg, processing_result_encrypt)
 
 
 def numeric_key_shifr_step_2(message):
     murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
-    message_encrypt.get_n_key(message.text)
+    if message_encrypt.typy_encrypt == 'По буквенному ключу':
+        message_encrypt.get_v_key(message.text)
+    else:
+        message_encrypt.get_n_key(message.text)
     full_massiv = numeric_key_shifr_algoritm(message_encrypt.text, message_encrypt.n_key,
                                              message_encrypt.n_key_ascending)
     stroka = "".join(full_massiv)
@@ -195,11 +207,11 @@ def decryption_implementation(message):
 
     if message_encrypt.typy_encrypt == 'Вертикальная':
         message_encrypt.text = "".join(vertical_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", "")))
-    elif message.text == 'Меандровая':
+    elif message_encrypt.typy_encrypt == 'Меандровая':
         message_encrypt.text = "".join(meandr_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", "")))
-    elif message.text == 'Спиральная':
+    elif message_encrypt.typy_encrypt == 'Спиральная':
         message_encrypt.text = "".join(spiral_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", "")))
-    elif message.text == 'По числовому ключу':
+    elif message_encrypt.typy_encrypt == 'По числовому ключу' or message_encrypt.typy_encrypt == 'По буквенному ключу':
         message_encrypt.text = "".join(numeric_key_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", ""),
                                                                     message_encrypt.n_key,
                                                                     message_encrypt.n_key_ascending))

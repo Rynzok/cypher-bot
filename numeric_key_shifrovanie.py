@@ -43,8 +43,9 @@ def numeric_key_deshifr_algoritm(stroka, numeric_key, array_of_numbers):
         dict_row[array_of_numbers[j]].append(line)
 
     for j in range(size[0]):
-        full_massiv = dict_row.get(numeric_key[j])
-        line = "".join(full_massiv)
+        # full_massiv = dict_row.get(numeric_key[j])
+        # line = "".join(full_massiv)
+        line = "".join(dict_row.get(int(numeric_key[j])))
         for i in range(size[1]):
             massiv[i][j] = line[i]
     n = 0
