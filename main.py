@@ -5,6 +5,7 @@ from meandr_shifrovanie import meandr_shifr_algoritm, meandr_deshifr_algoritm
 from document_processing import getting_text_from_a_document, writing_text_to_a_document
 from spiral_shifrivanie import spiral_shifr_algoritm, spiral_deshifr_algoritm
 from numeric_key_shifrovanie import numeric_key_shifr_algoritm, numeric_key_deshifr_algoritm
+from magic_square_shifrovanie import magic_square_shifr_algoritm, magic_square_deshifr_algoritm
 from murkup_creation import murkup_creation
 from faind_dels import find_all_dels
 from sortirivka import fast_sort
@@ -99,9 +100,9 @@ def shifrovanie_choose2(message):
         msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
     elif message.text == 'Сложная':
-        murkup = murkup_creation(button_names=['Назад', 'Назад', 'Назад', 'Назад'])
+        murkup = murkup_creation(button_names=['Магичсекий квадрат', 'Назад', 'Назад', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Каким способом?', reply_markup=murkup)
-        bot.register_next_step_handler(msg, deshifrovanie_choose)
+        bot.register_next_step_handler(msg, shifrovanie)
     elif message.text == 'назад':
         user_answer(message)
 
@@ -151,6 +152,8 @@ def implementation_of_encryption(message):
                                reply_markup=murkup2)
         bot.register_next_step_handler(nsg, numeric_key_shifr_step_2)
         return
+    elif message_encrypt.typy_encrypt == 'Магичсекий квадрат':
+        message_encrypt.get_text_encrypted("".join(magic_square_shifr_algoritm(message_encrypt.text)))
 
     if message_encrypt.text_or_doc == 'Документ':
         writing_text_to_a_document(message_encrypt.src, message_encrypt.text_encrypted)
@@ -215,6 +218,8 @@ def decryption_implementation(message):
         message_encrypt.text = "".join(numeric_key_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", ""),
                                                                     message_encrypt.n_key,
                                                                     message_encrypt.n_key_ascending))
+    elif message_encrypt.typy_encrypt == 'Магичсекий квадрат':
+        message_encrypt.text = "".join(magic_square_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", "")))
     elif message.text == 'Назад':
         shifrovanie_choose(message)
 
