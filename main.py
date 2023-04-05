@@ -6,6 +6,7 @@ from document_processing import getting_text_from_a_document, writing_text_to_a_
 from spiral_shifrivanie import spiral_shifr_algoritm, spiral_deshifr_algoritm
 from numeric_key_shifrovanie import numeric_key_shifr_algoritm, numeric_key_deshifr_algoritm
 from magic_square_shifrovanie import magic_square_shifr_algoritm, magic_square_deshifr_algoritm
+from double_shifrivanie import double_shifr_algoritm, double_deshifr_algoritm
 from murkup_creation import murkup_creation
 from faind_dels import find_all_dels
 from sortirivka import fast_sort
@@ -24,6 +25,7 @@ class MessageEncryption:
         self.rows = 0
         self.columns = 0
         self.n_key = ''
+        self.n_key_last = ''
         self.v_key = ''
         self.n_key_ascending = []
         self.src = ''
@@ -100,7 +102,7 @@ def shifrovanie_choose2(message):
         msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
     elif message.text == 'Сложная':
-        murkup = murkup_creation(button_names=['Магичсекий квадрат', 'Назад', 'Назад', 'Назад'])
+        murkup = murkup_creation(button_names=['Магичсекий квадрат', 'Двойная перестановка', 'Назад', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Каким способом?', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
     elif message.text == 'назад':
@@ -152,6 +154,17 @@ def implementation_of_encryption(message):
                                reply_markup=murkup2)
         bot.register_next_step_handler(nsg, numeric_key_shifr_step_2)
         return
+
+    elif message_encrypt.typy_encrypt == 'Двойная перестановка':
+        murkup2 = types.ReplyKeyboardRemove()
+        size = find_all_dels(int(len(message_encrypt.text)))
+        message_encrypt.rows = size[1]
+        message_encrypt.columns = size[0]
+        nsg = bot.send_message(message.chat.id, f'Введите последовательность из {size[0]} НЕ одинаковых чисел',
+                               reply_markup=murkup2)
+        bot.register_next_step_handler(nsg, double_shifr)
+        return
+
     elif message_encrypt.typy_encrypt == 'Магичсекий квадрат':
         message_encrypt.get_text_encrypted("".join(magic_square_shifr_algoritm(message_encrypt.text)))
 
@@ -160,6 +173,7 @@ def implementation_of_encryption(message):
         msg = bot.send_document(message.chat.id, open(f'{message_encrypt.src}', 'rb'), reply_markup=murkup)
         bot.register_next_step_handler(msg, processing_result_encrypt)
         return
+
     msg = bot.send_message(message.chat.id, f'{message_encrypt.text_encrypted}', reply_markup=murkup)
     bot.register_next_step_handler(msg, processing_result_encrypt)
 
@@ -172,6 +186,48 @@ def numeric_key_shifr_step_2(message):
         message_encrypt.get_n_key(message.text)
     full_massiv = numeric_key_shifr_algoritm(message_encrypt.text, message_encrypt.n_key,
                                              message_encrypt.n_key_ascending)
+    stroka = "".join(full_massiv)
+    stroka = stroka.replace("[", "")
+    stroka = stroka.replace("]", "")
+    stroka = stroka.replace("'", "")
+    message_encrypt.text_encrypted = stroka
+    if message_encrypt.text_or_doc == 'Документ':
+        writing_text_to_a_document(message_encrypt.src, message_encrypt.text_encrypted)
+        msg = bot.send_document(message.chat.id, open(f'{message_encrypt.src}', 'rb'), reply_markup=murkup)
+        bot.register_next_step_handler(msg, processing_result_encrypt)
+        return
+    msg = bot.send_message(message.chat.id, f'{message_encrypt.text_encrypted}', reply_markup=murkup)
+    bot.register_next_step_handler(msg, processing_result_encrypt)
+
+
+def double_shifr(message):
+    murkup = types.ReplyKeyboardRemove()
+    # if message_encrypt.typy_encrypt == 'По буквенному ключу':
+    #     message_encrypt.get_v_key(message.text)
+    # else:
+    message_encrypt.get_n_key(message.text)
+    message_encrypt.n_key_last = message.text
+    full_massiv = numeric_key_shifr_algoritm(message_encrypt.text, message_encrypt.n_key,
+                                             message_encrypt.n_key_ascending)
+    stroka = "".join(full_massiv)
+    stroka = stroka.replace("[", "")
+    stroka = stroka.replace("]", "")
+    stroka = stroka.replace("'", "")
+    message_encrypt.text = stroka
+    bot.send_message(message.chat.id, f'{message_encrypt.text}')
+    msg = bot.send_message(message.chat.id, f'Введите последовательность из {message_encrypt.rows} НЕ одинаковых чисел',
+                           reply_markup=murkup)
+    bot.register_next_step_handler(msg, double_shifr_step_2)
+
+
+def double_shifr_step_2(message):
+    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    # if message_encrypt.typy_encrypt == 'По буквенному ключу':
+    #     message_encrypt.get_v_key(message.text)
+    # else:
+    message_encrypt.get_n_key(message.text)
+    full_massiv = double_shifr_algoritm(message_encrypt.text, message_encrypt.n_key,
+                                        message_encrypt.n_key_ascending)
     stroka = "".join(full_massiv)
     stroka = stroka.replace("[", "")
     stroka = stroka.replace("]", "")
@@ -220,6 +276,17 @@ def decryption_implementation(message):
                                                                     message_encrypt.n_key_ascending))
     elif message_encrypt.typy_encrypt == 'Магичсекий квадрат':
         message_encrypt.text = "".join(magic_square_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", "")))
+
+    elif message_encrypt.typy_encrypt == 'Двойная перестановка':
+        message_encrypt.text_encrypted = "".join(double_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ",
+                                                                                                                ""),
+                                                                         message_encrypt.n_key,
+                                                                         message_encrypt.n_key_ascending))
+        bot.send_message(message.chat.id, f'{message_encrypt.text_encrypted}')
+        message_encrypt.get_n_key(message_encrypt.n_key_last)
+        message_encrypt.text = "".join(numeric_key_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", ""),
+                                                                    message_encrypt.n_key,
+                                                                    message_encrypt.n_key_ascending))
     elif message.text == 'Назад':
         shifrovanie_choose(message)
 
@@ -233,7 +300,8 @@ def decryption_implementation(message):
 
 
 def deshifrovanie_choose(message):
-    pass
+    bot.send_message(message.chat.id, 'Контент в разработке')
+    start(message)
 
 
 bot.polling(none_stop=True)

@@ -31,8 +31,8 @@ def numeric_key_deshifr_algoritm(stroka, numeric_key, array_of_numbers):
     n = 0
     size = find_all_dels(int(len(stroka)))
     dict_row = {}
-    column = [0] * size[1]
-    massiv = [[0] * size[0] for i in range(size[1])]
+    column = [''] * size[1]
+    massiv = [[''] * size[0] for i in range(size[1])]
 
     for j in range(size[0]):
         dict_row[array_of_numbers[j]] = []
@@ -43,13 +43,11 @@ def numeric_key_deshifr_algoritm(stroka, numeric_key, array_of_numbers):
         dict_row[array_of_numbers[j]].append(line)
 
     for j in range(size[0]):
-        # full_massiv = dict_row.get(numeric_key[j])
-        # line = "".join(full_massiv)
         line = "".join(dict_row.get(int(numeric_key[j])))
         for i in range(size[1]):
             massiv[i][j] = line[i]
     n = 0
-    full_massiv = [0] * int(len(stroka))
+    full_massiv = [''] * int(len(stroka))
     for i in range(size[1]):
         for j in range(size[0]):
             full_massiv[n] = str(massiv[i][j])
