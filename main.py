@@ -7,6 +7,7 @@ from spiral_shifrivanie import spiral_shifr_algoritm, spiral_deshifr_algoritm
 from numeric_key_shifrovanie import numeric_key_shifr_algoritm, numeric_key_deshifr_algoritm
 from magic_square_shifrovanie import magic_square_shifr_algoritm, magic_square_deshifr_algoritm
 from double_shifrivanie import double_shifr_algoritm, double_deshifr_algoritm
+from diagonal_shifrovanie import  diagonal_shifr_algoritm, diagonal_deshifr_algoritm
 from murkup_creation import murkup_creation
 from faind_dels import find_all_dels
 from sortirivka import fast_sort
@@ -97,12 +98,12 @@ def shifrovanie_choose(message):
 # Выбор конкретного способа шифрования
 def shifrovanie_choose2(message):
     if message.text == 'Простая' or message.text == 'Назад':
-        murkup = murkup_creation(button_names=['Вертикальная', 'Меандровая', 'Спиральная', 'По числовому ключу',
-                                               'По буквенному ключу', 'Назад'])
+        murkup = murkup_creation(button_names=['Вертикальная', 'Меандровая', 'Спиральная', 'Диагональная', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
     elif message.text == 'Сложная':
-        murkup = murkup_creation(button_names=['Магичсекий квадрат', 'Двойная перестановка', 'Назад', 'Назад'])
+        murkup = murkup_creation(button_names=['Магичсекий квадрат', 'Двойная перестановка', 'По числовому ключу',
+                                               'По буквенному ключу', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Каким способом?', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
     elif message.text == 'назад':
@@ -140,6 +141,8 @@ def implementation_of_encryption(message):
         message_encrypt.get_text_encrypted("".join(meandr_shifr_algoritm(message_encrypt.text)))
     elif message_encrypt.typy_encrypt == 'Спиральная':
         message_encrypt.get_text_encrypted("".join(spiral_shifr_algoritm(message_encrypt.text)))
+    elif message_encrypt.typy_encrypt == 'Диагональная':
+        message_encrypt.get_text_encrypted("".join(diagonal_shifr_algoritm(message_encrypt.text)))
     elif message_encrypt.typy_encrypt == 'По числовому ключу':
         murkup2 = types.ReplyKeyboardRemove()
         size = find_all_dels(int(len(message_encrypt.text)))
