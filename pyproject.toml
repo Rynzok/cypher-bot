@@ -9,6 +9,7 @@ packages = [{include = "cypher_bot"}]
 [tool.poetry.dependencies]
 python = "^3.11"
 pytelegrambotapi = "^4.10.0"
+python-docx = "^0.8.11"
 
 
 [build-system]
