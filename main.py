@@ -7,7 +7,7 @@ from spiral_shifrivanie import spiral_shifr_algoritm, spiral_deshifr_algoritm
 from numeric_key_shifrovanie import numeric_key_shifr_algoritm, numeric_key_deshifr_algoritm
 from magic_square_shifrovanie import magic_square_shifr_algoritm, magic_square_deshifr_algoritm
 from double_shifrivanie import double_shifr_algoritm, double_deshifr_algoritm
-from diagonal_shifrovanie import  diagonal_shifr_algoritm, diagonal_deshifr_algoritm
+from diagonal_shifrovanie import diagonal_shifr_algoritm, diagonal_deshifr_algoritm
 from murkup_creation import murkup_creation
 from faind_dels import find_all_dels
 from sortirivka import fast_sort
@@ -273,6 +273,8 @@ def decryption_implementation(message):
         message_encrypt.text = "".join(meandr_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", "")))
     elif message_encrypt.typy_encrypt == 'Спиральная':
         message_encrypt.text = "".join(spiral_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", "")))
+    elif message_encrypt.typy_encrypt == 'Диагональная':
+        message_encrypt.text = "".join(diagonal_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", "")))
     elif message_encrypt.typy_encrypt == 'По числовому ключу' or message_encrypt.typy_encrypt == 'По буквенному ключу':
         message_encrypt.text = "".join(numeric_key_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", ""),
                                                                     message_encrypt.n_key,
