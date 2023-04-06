@@ -6,4 +6,7 @@ def find_all_dels(lenght):
             minimal_delta = lenght//i - i
             parties[0] = i
             parties[1] = lenght//i
+    if parties[1] == lenght:
+        lenght += 1
+        parties = find_all_dels(lenght)
     return parties

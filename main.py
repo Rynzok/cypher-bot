@@ -25,8 +25,8 @@ class MessageEncryption:
         self.text_encrypted = ''
         self.rows = 0
         self.columns = 0
-        self.n_key = ''
-        self.n_key_last = ''
+        self.n_key = []
+        self.n_key_last = []
         self.v_key = ''
         self.n_key_ascending = []
         self.src = ''
@@ -43,19 +43,21 @@ class MessageEncryption:
         self.columns = columns
 
     def get_n_key(self, n_key):
-        self.n_key = n_key
-        array_of_numbers = [0] * len(n_key)
-        for j in range(len(n_key)):
-            array_of_numbers[j] = int(n_key[j])
+        self.n_key = list(n_key)
+        array_of_numbers = [0] * len(self.n_key)
+        for j in range(len(self.n_key)):
+            array_of_numbers[j] = int(self.n_key[j])
         self.n_key_ascending = fast_sort(array_of_numbers)
 
     def get_v_key(self, v_key):
         self.v_key = v_key
-        nn_key = [0] * len(v_key)
-        for i in range(len(nn_key)):
-            nn_key[i] = simple_dictionary[v_key[i]]
-        self.n_key = "".join(map(str, nn_key))
-        self.get_n_key(self.n_key)
+        self.n_key = [0] * len(v_key)
+        for i in range(len(self.n_key)):
+            self.n_key[i] = simple_dictionary[v_key[i]]
+        array_of_numbers = [0] * len(self.n_key)
+        for j in range(len(self.n_key)):
+            array_of_numbers[j] = int(self.n_key[j])
+        self.n_key_ascending = fast_sort(array_of_numbers)
 
 
 message_encrypt = MessageEncryption("")
@@ -209,7 +211,7 @@ def double_shifr(message):
     #     message_encrypt.get_v_key(message.text)
     # else:
     message_encrypt.get_n_key(message.text)
-    message_encrypt.n_key_last = message.text
+    message_encrypt.n_key_last = list(message.text)
     full_massiv = numeric_key_shifr_algoritm(message_encrypt.text, message_encrypt.n_key,
                                              message_encrypt.n_key_ascending)
     stroka = "".join(full_massiv)
