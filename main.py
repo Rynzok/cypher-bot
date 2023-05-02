@@ -8,6 +8,7 @@ from numeric_key_shifrovanie import numeric_key_shifr_algoritm, numeric_key_desh
 from magic_square_shifrovanie import magic_square_shifr_algoritm, magic_square_deshifr_algoritm
 from double_shifrivanie import double_shifr_algoritm, double_deshifr_algoritm
 from diagonal_shifrovanie import diagonal_shifr_algoritm, diagonal_deshifr_algoritm
+from atbach_shifr_algoritm import atbach_shifr_algoritm
 from murkup_creation import murkup_creation
 from faind_dels import find_all_dels
 from sortirivka import fast_sort
@@ -92,7 +93,7 @@ def shifrovanie_choose(message):
     elif message.text == 'Замена':
         murkup = murkup_creation(button_names=['Моноалфавитная', 'Полиалфавитная', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Каким способом?', reply_markup=murkup)
-        bot.register_next_step_handler(msg, deshifrovanie_choose)
+        bot.register_next_step_handler(msg, shifrovanie_choose3)
     elif message.text == 'назад':
         start(message)
 
@@ -106,7 +107,20 @@ def shifrovanie_choose2(message):
     elif message.text == 'Сложная':
         murkup = murkup_creation(button_names=['Магичсекий квадрат', 'Двойная перестановка', 'По числовому ключу',
                                                'По буквенному ключу', 'Назад'])
-        msg = bot.send_message(message.chat.id, 'Каким способом?', reply_markup=murkup)
+        msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
+        bot.register_next_step_handler(msg, shifrovanie)
+    elif message.text == 'назад':
+        user_answer(message)
+
+
+def shifrovanie_choose3(message):
+    if message.text == 'Моноалфавитная' or message.text == 'Назад':
+        murkup = murkup_creation(button_names=['Атбаш', 'Код Грея', 'Тарабарская грамота', 'Назад'])
+        msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
+        bot.register_next_step_handler(msg, shifrovanie)
+    elif message.text == 'Полиалфавитная':
+        murkup = murkup_creation(button_names=['Футрамы', 'Вижнера', 'Назад'])
+        msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
     elif message.text == 'назад':
         user_answer(message)
@@ -125,6 +139,7 @@ def shifrovanie(message):
 
 def implementation_of_encryption(message):
     murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    # Блок с обработкой документа или текста
     if message.document:
         bot.send_message(message.chat.id, 'Это документ')
         file_info = bot.get_file(message.document.file_id)
@@ -136,7 +151,7 @@ def implementation_of_encryption(message):
         message_encrypt.get_text(getting_text_from_a_document(message_encrypt.src).replace(" ", ""), 'Документ')
     else:
         message_encrypt.get_text(message.text.replace(" ", ""), 'Текст')
-
+    # Блок с алгоритмами шифрования в зависимости от выбора
     if message_encrypt.typy_encrypt == 'Вертикальная':
         message_encrypt.get_text_encrypted("".join(vertical_shifr_algoritm(message_encrypt.text)))
     elif message_encrypt.typy_encrypt == 'Меандровая':
@@ -173,6 +188,10 @@ def implementation_of_encryption(message):
     elif message_encrypt.typy_encrypt == 'Магичсекий квадрат':
         message_encrypt.get_text_encrypted("".join(magic_square_shifr_algoritm(message_encrypt.text)))
 
+    elif message_encrypt.typy_encrypt == 'Атбаш':
+        message_encrypt.get_text_encrypted("".join(atbach_shifr_algoritm(message_encrypt.text)))
+
+    # Блок с отправкой документа, если был изначально отправлен документ
     if message_encrypt.text_or_doc == 'Документ':
         writing_text_to_a_document(message_encrypt.src, message_encrypt.text_encrypted)
         msg = bot.send_document(message.chat.id, open(f'{message_encrypt.src}', 'rb'), reply_markup=murkup)
@@ -294,6 +313,10 @@ def decryption_implementation(message):
         message_encrypt.text = "".join(numeric_key_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", ""),
                                                                     message_encrypt.n_key,
                                                                     message_encrypt.n_key_ascending))
+
+    elif message_encrypt.typy_encrypt == 'Атбаш':
+        message_encrypt.get_text_encrypted("".join(atbach_shifr_algoritm(message_encrypt.text)))
+
     elif message.text == 'Назад':
         shifrovanie_choose(message)
 
