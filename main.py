@@ -8,7 +8,7 @@ from numeric_key_shifrovanie import numeric_key_shifr_algoritm, numeric_key_desh
 from magic_square_shifrovanie import magic_square_shifr_algoritm, magic_square_deshifr_algoritm
 from double_shifrivanie import double_shifr_algoritm, double_deshifr_algoritm
 from diagonal_shifrovanie import diagonal_shifr_algoritm, diagonal_deshifr_algoritm
-from atbach_shifr_algoritm import atbach_shifr_algoritm, tarabarckai_letter
+from atbach_shifr_algoritm import atbach_shifr_algoritm, tarabarckai_letter, dnk_shifr_algoritm, dnk_deshifr_algoritm
 from murkup_creation import murkup_creation
 from faind_dels import find_all_dels
 from sortirivka import fast_sort
@@ -113,9 +113,10 @@ def shifrovanie_choose2(message):
         user_answer(message)
 
 
+# Выбор конкретного способа шифрования
 def shifrovanie_choose3(message):
     if message.text == 'Моноалфавитная' or message.text == 'Назад':
-        murkup = murkup_creation(button_names=['Атбаш', 'Код Грея', 'Тарабарская грамота', 'Назад'])
+        murkup = murkup_creation(button_names=['Атбаш', 'Шифр ДНК', 'Тарабарская грамота', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
     elif message.text == 'Полиалфавитная':
@@ -137,6 +138,7 @@ def shifrovanie(message):
     bot.register_next_step_handler(msg, implementation_of_encryption)
 
 
+# Реализация методов шифрования
 def implementation_of_encryption(message):
     murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
     # Блок с обработкой документа или текста
@@ -151,6 +153,7 @@ def implementation_of_encryption(message):
         message_encrypt.get_text(getting_text_from_a_document(message_encrypt.src).replace(" ", ""), 'Документ')
     else:
         message_encrypt.get_text(message.text.replace(" ", ""), 'Текст')
+
     # Блок с алгоритмами шифрования в зависимости от выбора
     if message_encrypt.typy_encrypt == 'Вертикальная':
         message_encrypt.get_text_encrypted("".join(vertical_shifr_algoritm(message_encrypt.text)))
@@ -194,6 +197,9 @@ def implementation_of_encryption(message):
     elif message_encrypt.typy_encrypt == 'Тарабарская грамота':
         message_encrypt.get_text_encrypted("".join(tarabarckai_letter(message_encrypt.text)))
 
+    elif message_encrypt.typy_encrypt == 'Шифр ДНК':
+        message_encrypt.get_text_encrypted("".join(dnk_shifr_algoritm(message_encrypt.text)))
+
     # Блок с отправкой документа, если был изначально отправлен документ
     if message_encrypt.text_or_doc == 'Документ':
         writing_text_to_a_document(message_encrypt.src, message_encrypt.text_encrypted)
@@ -205,6 +211,7 @@ def implementation_of_encryption(message):
     bot.register_next_step_handler(msg, processing_result_encrypt)
 
 
+# Получение ключа
 def numeric_key_shifr_step_2(message):
     murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
     if message_encrypt.typy_encrypt == 'По буквенному ключу':
@@ -227,11 +234,9 @@ def numeric_key_shifr_step_2(message):
     bot.register_next_step_handler(msg, processing_result_encrypt)
 
 
+# Получение первого ключа
 def double_shifr(message):
     murkup = types.ReplyKeyboardRemove()
-    # if message_encrypt.typy_encrypt == 'По буквенному ключу':
-    #     message_encrypt.get_v_key(message.text)
-    # else:
     message_encrypt.get_n_key(message.text)
     message_encrypt.n_key_last = list(message.text)
     full_massiv = numeric_key_shifr_algoritm(message_encrypt.text, message_encrypt.n_key,
@@ -247,11 +252,9 @@ def double_shifr(message):
     bot.register_next_step_handler(msg, double_shifr_step_2)
 
 
+# Получение второго ключа
 def double_shifr_step_2(message):
     murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
-    # if message_encrypt.typy_encrypt == 'По буквенному ключу':
-    #     message_encrypt.get_v_key(message.text)
-    # else:
     message_encrypt.get_n_key(message.text)
     full_massiv = double_shifr_algoritm(message_encrypt.text, message_encrypt.n_key,
                                         message_encrypt.n_key_ascending)
@@ -269,6 +272,7 @@ def double_shifr_step_2(message):
     bot.register_next_step_handler(msg, processing_result_encrypt)
 
 
+# Выбор действий после шифрования
 def processing_result_encrypt(message):
     if message.text == 'Новая фраза':
         msg = bot.send_message(message.chat.id, 'Введите фразу')
@@ -318,10 +322,13 @@ def decryption_implementation(message):
                                                                     message_encrypt.n_key_ascending))
 
     elif message_encrypt.typy_encrypt == 'Атбаш':
-        message_encrypt.get_text_encrypted("".join(atbach_shifr_algoritm(message_encrypt.text)))
+        message_encrypt.text = "".join(atbach_shifr_algoritm(message_encrypt.text_encrypted.replace(" ", "")))
 
     elif message_encrypt.typy_encrypt == 'Тарабарская грамота':
-        message_encrypt.get_text_encrypted("".join(tarabarckai_letter(message_encrypt.text)))
+        message_encrypt.text = "".join(tarabarckai_letter(message_encrypt.text_encrypted.replace(" ", "")))
+
+    elif message_encrypt.typy_encrypt == 'Шифр ДНК':
+        message_encrypt.text = "".join(dnk_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", "")))
 
     elif message.text == 'Назад':
         shifrovanie_choose(message)
