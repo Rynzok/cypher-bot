@@ -9,6 +9,7 @@ from magic_square_shifrovanie import magic_square_shifr_algoritm, magic_square_d
 from double_shifrivanie import double_shifr_algoritm, double_deshifr_algoritm
 from diagonal_shifrovanie import diagonal_shifr_algoritm, diagonal_deshifr_algoritm
 from atbach_shifr_algoritm import atbach_shifr_algoritm, tarabarckai_letter, dnk_shifr_algoritm, dnk_deshifr_algoritm
+from code_grey import code_grey_shifr_algoritm
 from murkup_creation import murkup_creation
 from faind_dels import find_all_dels
 from sortirivka import fast_sort
@@ -116,7 +117,7 @@ def shifrovanie_choose2(message):
 # Выбор конкретного способа шифрования
 def shifrovanie_choose3(message):
     if message.text == 'Моноалфавитная' or message.text == 'Назад':
-        murkup = murkup_creation(button_names=['Атбаш', 'Шифр ДНК', 'Тарабарская грамота', 'Назад'])
+        murkup = murkup_creation(button_names=['Атбаш', 'Шифр ДНК', 'Тарабарская грамота', 'Код Грея', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
     elif message.text == 'Полиалфавитная':
@@ -199,6 +200,9 @@ def implementation_of_encryption(message):
 
     elif message_encrypt.typy_encrypt == 'Шифр ДНК':
         message_encrypt.get_text_encrypted("".join(dnk_shifr_algoritm(message_encrypt.text)))
+
+    elif message_encrypt.typy_encrypt == 'Код Грея':
+        message_encrypt.get_text_encrypted("".join(code_grey_shifr_algoritm(message_encrypt.text)))
 
     # Блок с отправкой документа, если был изначально отправлен документ
     if message_encrypt.text_or_doc == 'Документ':
