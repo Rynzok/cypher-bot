@@ -10,7 +10,8 @@ from double_shifrivanie import double_shifr_algoritm, double_deshifr_algoritm
 from diagonal_shifrovanie import diagonal_shifr_algoritm, diagonal_deshifr_algoritm
 from atbach_shifr_algoritm import atbach_shifr_algoritm, tarabarckai_letter, dnk_shifr_algoritm, dnk_deshifr_algoritm
 from code_grey import code_grey_shifr_algoritm, code_grey_deshifr_algoritm
-from polibei_shifrovanie import polibei_shirf_algoritm_1, polibei_deshirf_algoritm_1
+from polibei_shifrovanie import polibei_shirf_algoritm_1, polibei_deshirf_algoritm_1, polibei_shirf_algoritm_2,\
+    polibei_deshirf_algoritm_2
 from murkup_creation import murkup_creation
 from faind_dels import find_all_dels
 from sortirivka import fast_sort
@@ -119,7 +120,7 @@ def shifrovanie_choose2(message):
 def shifrovanie_choose3(message):
     if message.text == 'Моноалфавитная' or message.text == 'Назад':
         murkup = murkup_creation(button_names=['Атбаш', 'Шифр ДНК', 'Тарабарская грамота', 'Код Грея',
-                                               'Квадрат полибея (м-1)', 'Назад'])
+                                               'Квадрат полибея (м-1)', 'Квадрат полибея (м-2)', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
     elif message.text == 'Полиалфавитная':
@@ -208,6 +209,9 @@ def implementation_of_encryption(message):
 
     elif message_encrypt.typy_encrypt == 'Квадрат полибея (м-1)':
         message_encrypt.get_text_encrypted("".join(polibei_shirf_algoritm_1(message_encrypt.text)))
+
+    elif message_encrypt.typy_encrypt == 'Квадрат полибея (м-2)':
+        message_encrypt.get_text_encrypted("".join(polibei_shirf_algoritm_2(message_encrypt.text)))
 
     # Блок с отправкой документа, если был изначально отправлен документ
     if message_encrypt.text_or_doc == 'Документ':
@@ -344,6 +348,9 @@ def decryption_implementation(message):
 
     elif message_encrypt.typy_encrypt == 'Квадрат полибея (м-1)':
         message_encrypt.text = "".join(polibei_deshirf_algoritm_1(message_encrypt.text_encrypted.replace(" ", "")))
+
+    elif message_encrypt.typy_encrypt == 'Квадрат полибея (м-2)':
+        message_encrypt.text = "".join(polibei_deshirf_algoritm_2(message_encrypt.text_encrypted.replace(" ", "")))
 
     elif message.text == 'Назад':
         shifrovanie_choose(message)
