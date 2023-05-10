@@ -419,7 +419,7 @@ PolibeiK = {
             '23': 'о',
             '24': 'п',
             '30': 'р',
-            '31': 'м',
+            '31': 'с',
             '32': 'т',
             '33': 'у',
             '34': 'ф',
@@ -434,35 +434,3 @@ PolibeiK = {
             '53': 'ю',
             '54': 'я',
             }
-
-# Polibei[(0, 0)] = 'а'
-# Polibei[(0, 1)] = 'б'
-# Polibei[(0, 2)] = 'в'
-# Polibei[(0, 3)] = 'г'
-# Polibei[(0, 4)] = 'д'
-# Polibei[(1, 0)] = 'е'
-# Polibei[(1, 1)] = 'ж'
-# Polibei[(1, 2)] = 'з'
-# Polibei[(1, 3)] = 'и'
-# Polibei[(1, 4)] = 'к'
-# Polibei[(2, 0)] = 'л'
-# Polibei[(2, 1)] = 'м'
-# Polibei[(2, 2)] = 'н'
-# Polibei[(2, 3)] = 'о'
-# Polibei[(2, 4)] = 'п'
-# Polibei[(3, 0)] = 'р'
-# Polibei[(3, 1)] = 'с'
-# Polibei[(3, 2)] = 'т'
-# Polibei[(3, 3)] = 'у'
-# Polibei[(3, 4)] = 'ф'
-# Polibei[(4, 0)] = 'х'
-# Polibei[(4, 1)] = 'ц'
-# Polibei[(4, 2)] = 'ч'
-# Polibei[(4, 3)] = 'ш'
-# Polibei[(4, 4)] = 'щ'
-# Polibei[(5, 0)] = 'ы'
-# Polibei[(5, 1)] = 'ь'
-# Polibei[(5, 2)] = 'э'
-# Polibei[(5, 3)] = 'ю'
-# Polibei[(5, 4)] = 'я'
-

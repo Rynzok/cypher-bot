@@ -10,7 +10,7 @@ from double_shifrivanie import double_shifr_algoritm, double_deshifr_algoritm
 from diagonal_shifrovanie import diagonal_shifr_algoritm, diagonal_deshifr_algoritm
 from atbach_shifr_algoritm import atbach_shifr_algoritm, tarabarckai_letter, dnk_shifr_algoritm, dnk_deshifr_algoritm
 from code_grey import code_grey_shifr_algoritm, code_grey_deshifr_algoritm
-from polibei_shifrovanie import polibei_shirf_algoritm_1
+from polibei_shifrovanie import polibei_shirf_algoritm_1, polibei_deshirf_algoritm_1
 from murkup_creation import murkup_creation
 from faind_dels import find_all_dels
 from sortirivka import fast_sort
@@ -341,6 +341,9 @@ def decryption_implementation(message):
 
     elif message_encrypt.typy_encrypt == 'Код Грея':
         message_encrypt.text = "".join(code_grey_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", "")))
+
+    elif message_encrypt.typy_encrypt == 'Квадрат полибея (м-1)':
+        message_encrypt.text = "".join(polibei_deshirf_algoritm_1(message_encrypt.text_encrypted.replace(" ", "")))
 
     elif message.text == 'Назад':
         shifrovanie_choose(message)
