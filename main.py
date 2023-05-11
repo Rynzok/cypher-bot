@@ -12,7 +12,7 @@ from atbach_shifr_algoritm import atbach_shifr_algoritm, tarabarckai_letter, dnk
 from code_grey import code_grey_shifr_algoritm, code_grey_deshifr_algoritm
 from polibei_shifrovanie import polibei_shirf_algoritm_1, polibei_deshirf_algoritm_1, polibei_shirf_algoritm_2,\
     polibei_deshirf_algoritm_2, polibei_shirf_algoritm_3, polibei_deshirf_algoritm_3
-from caesor_chofrovanie import caesar_shifr_algoritm, caesar_deshifr_algoritm
+from caesor_chofrovanie import caesar_shifr_algoritm, caesar_deshifr_algoritm, caesar_crypt_algorithm
 from murkup_creation import murkup_creation
 from faind_dels import find_all_dels
 from sortirivka import fast_sort
@@ -35,6 +35,8 @@ class MessageEncryption:
         self.v_key = ''
         self.n_key_ascending = []
         self.src = ''
+        self.step1 = 0
+        self.step2 = 1
 
     def get_text(self, text, type_text):
         self.text = text
@@ -122,7 +124,7 @@ def shifrovanie_choose3(message):
     if message.text == 'Моноалфавитная' or message.text == 'Назад':
         murkup = murkup_creation(button_names=['Атбаш', 'Шифр ДНК', 'Тарабарская грамота', 'Код Грея',
                                                'Квадрат полибея (м-1)', 'Квадрат полибея (м-2)',
-                                               'Квадрат полибея (м-3)', 'Шифр Цезаря', 'Назад'])
+                                               'Квадрат полибея (м-3)', 'Шифр Цезаря', 'Шифр Цезаря (А)', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
     elif message.text == 'Полиалфавитная':
@@ -220,9 +222,13 @@ def implementation_of_encryption(message):
 
     elif message_encrypt.typy_encrypt == 'Шифр Цезаря':
         murkup2 = types.ReplyKeyboardRemove()
-        # size = find_all_dels(int(len(message_encrypt.text)))
-        # message_encrypt.rows = size[1]
-        # message_encrypt.columns = size[0]
+        nsg = bot.send_message(message.chat.id, f'Введите число, на которое будет производиться сдвиг',
+                               reply_markup=murkup2)
+        bot.register_next_step_handler(nsg, caesar_shifr)
+        return
+
+    elif message_encrypt.typy_encrypt == 'Шифр Цезаря (А)':
+        murkup2 = types.ReplyKeyboardRemove()
         nsg = bot.send_message(message.chat.id, f'Введите число, на которое будет производиться сдвиг',
                                reply_markup=murkup2)
         bot.register_next_step_handler(nsg, caesar_shifr)
@@ -303,11 +309,31 @@ def double_shifr_step_2(message):
 def caesar_shifr(message):
     murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
     message_encrypt.get_n_key(message.text)
+    message_encrypt.step1 = int(message.text)
+    if message_encrypt.typy_encrypt == 'Шифр Цезаря (А)':
+        murkup2 = types.ReplyKeyboardRemove()
+        nsg = bot.send_message(message.chat.id, f'Введите число, на которое будет производиться сдвиг',
+                               reply_markup=murkup2)
+        bot.register_next_step_handler(nsg, caesar_shifr_a)
+        return
+
     full_massiv = caesar_shifr_algoritm(message_encrypt.text, message_encrypt.n_key)
     stroka = "".join(full_massiv)
-    # stroka = stroka.replace("[", "")
-    # stroka = stroka.replace("]", "")
-    # stroka = stroka.replace("'", "")
+    message_encrypt.text_encrypted = stroka
+    if message_encrypt.text_or_doc == 'Документ':
+        writing_text_to_a_document(message_encrypt.src, message_encrypt.text_encrypted)
+        msg = bot.send_document(message.chat.id, open(f'{message_encrypt.src}', 'rb'), reply_markup=murkup)
+        bot.register_next_step_handler(msg, processing_result_encrypt)
+        return
+    msg = bot.send_message(message.chat.id, f'{message_encrypt.text_encrypted}', reply_markup=murkup)
+    bot.register_next_step_handler(msg, processing_result_encrypt)
+
+
+def caesar_shifr_a(message):
+    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    message_encrypt.step2 = int(message.text)
+    full_massiv = caesar_crypt_algorithm(message_encrypt.text, message_encrypt.step1, message_encrypt.step2)
+    stroka = "".join(full_massiv)
     message_encrypt.text_encrypted = stroka
     if message_encrypt.text_or_doc == 'Документ':
         writing_text_to_a_document(message_encrypt.src, message_encrypt.text_encrypted)
