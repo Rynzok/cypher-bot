@@ -12,7 +12,7 @@ from atbach_shifr_algoritm import atbach_shifr_algoritm, tarabarckai_letter, dnk
 from code_grey import code_grey_shifr_algoritm, code_grey_deshifr_algoritm
 from polibei_shifrovanie import polibei_shirf_algoritm_1, polibei_deshirf_algoritm_1, polibei_shirf_algoritm_2,\
     polibei_deshirf_algoritm_2, polibei_shirf_algoritm_3, polibei_deshirf_algoritm_3
-from caesor_chofrovanie import caesar_shifr_algoritm, caesar_deshifr_algoritm, caesar_crypt_algorithm
+from caesor_chofrovanie import caesar_crypt_algorithm, caesar_decrypt_algorithm
 from murkup_creation import murkup_creation
 from faind_dels import find_all_dels
 from sortirivka import fast_sort
@@ -307,17 +307,16 @@ def double_shifr_step_2(message):
 
 
 def caesar_shifr(message):
-    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
-    message_encrypt.get_n_key(message.text)
     message_encrypt.step1 = int(message.text)
     if message_encrypt.typy_encrypt == 'Шифр Цезаря (А)':
         murkup2 = types.ReplyKeyboardRemove()
-        nsg = bot.send_message(message.chat.id, f'Введите число, на которое будет производиться сдвиг',
+        nsg = bot.send_message(message.chat.id, f'Введите ещё число, на которое будет производиться сдвиг',
                                reply_markup=murkup2)
         bot.register_next_step_handler(nsg, caesar_shifr_a)
         return
-
-    full_massiv = caesar_shifr_algoritm(message_encrypt.text, message_encrypt.n_key)
+    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    message_encrypt.step2 = 1
+    full_massiv = caesar_crypt_algorithm(message_encrypt.text, message_encrypt.step1, message_encrypt.step2)
     stroka = "".join(full_massiv)
     message_encrypt.text_encrypted = stroka
     if message_encrypt.text_or_doc == 'Документ':
@@ -414,9 +413,9 @@ def decryption_implementation(message):
     elif message_encrypt.typy_encrypt == 'Квадрат полибея (м-3)':
         message_encrypt.text = "".join(polibei_deshirf_algoritm_3(message_encrypt.text_encrypted.replace(" ", "")))
 
-    elif message_encrypt.typy_encrypt == 'Шифр Цезаря':
-        message_encrypt.text = "".join(caesar_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", ""),
-                                                               message_encrypt.n_key))
+    elif message_encrypt.typy_encrypt == 'Шифр Цезаря' or 'Шифр Цезаря (А)':
+        message_encrypt.text = "".join(caesar_decrypt_algorithm(message_encrypt.text_encrypted.replace(" ", ""),
+                                                                message_encrypt.step1, message_encrypt.step2))
 
     elif message.text == 'Назад':
         shifrovanie_choose(message)
