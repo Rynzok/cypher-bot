@@ -12,6 +12,7 @@ from atbach_shifr_algoritm import atbach_shifr_algoritm, tarabarckai_letter, dnk
 from code_grey import code_grey_shifr_algoritm, code_grey_deshifr_algoritm
 from polibei_shifrovanie import polibei_shirf_algoritm_1, polibei_deshirf_algoritm_1, polibei_shirf_algoritm_2,\
     polibei_deshirf_algoritm_2, polibei_shirf_algoritm_3, polibei_deshirf_algoritm_3
+from caesor_chofrovanie import caesar_shifr_algoritm, caesar_deshifr_algoritm
 from murkup_creation import murkup_creation
 from faind_dels import find_all_dels
 from sortirivka import fast_sort
@@ -121,7 +122,7 @@ def shifrovanie_choose3(message):
     if message.text == 'Моноалфавитная' or message.text == 'Назад':
         murkup = murkup_creation(button_names=['Атбаш', 'Шифр ДНК', 'Тарабарская грамота', 'Код Грея',
                                                'Квадрат полибея (м-1)', 'Квадрат полибея (м-2)',
-                                               'Квадрат полибея (м-3)', 'Назад'])
+                                               'Квадрат полибея (м-3)', 'Шифр Цезаря', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
     elif message.text == 'Полиалфавитная':
@@ -217,6 +218,16 @@ def implementation_of_encryption(message):
     elif message_encrypt.typy_encrypt == 'Квадрат полибея (м-3)':
         message_encrypt.get_text_encrypted("".join(polibei_shirf_algoritm_3(message_encrypt.text)))
 
+    elif message_encrypt.typy_encrypt == 'Шифр Цезаря':
+        murkup2 = types.ReplyKeyboardRemove()
+        # size = find_all_dels(int(len(message_encrypt.text)))
+        # message_encrypt.rows = size[1]
+        # message_encrypt.columns = size[0]
+        nsg = bot.send_message(message.chat.id, f'Введите число, на которое будет производиться сдвиг',
+                               reply_markup=murkup2)
+        bot.register_next_step_handler(nsg, caesar_shifr)
+        return
+
     # Блок с отправкой документа, если был изначально отправлен документ
     if message_encrypt.text_or_doc == 'Документ':
         writing_text_to_a_document(message_encrypt.src, message_encrypt.text_encrypted)
@@ -279,6 +290,24 @@ def double_shifr_step_2(message):
     stroka = stroka.replace("[", "")
     stroka = stroka.replace("]", "")
     stroka = stroka.replace("'", "")
+    message_encrypt.text_encrypted = stroka
+    if message_encrypt.text_or_doc == 'Документ':
+        writing_text_to_a_document(message_encrypt.src, message_encrypt.text_encrypted)
+        msg = bot.send_document(message.chat.id, open(f'{message_encrypt.src}', 'rb'), reply_markup=murkup)
+        bot.register_next_step_handler(msg, processing_result_encrypt)
+        return
+    msg = bot.send_message(message.chat.id, f'{message_encrypt.text_encrypted}', reply_markup=murkup)
+    bot.register_next_step_handler(msg, processing_result_encrypt)
+
+
+def caesar_shifr(message):
+    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    message_encrypt.get_n_key(message.text)
+    full_massiv = caesar_shifr_algoritm(message_encrypt.text, message_encrypt.n_key)
+    stroka = "".join(full_massiv)
+    # stroka = stroka.replace("[", "")
+    # stroka = stroka.replace("]", "")
+    # stroka = stroka.replace("'", "")
     message_encrypt.text_encrypted = stroka
     if message_encrypt.text_or_doc == 'Документ':
         writing_text_to_a_document(message_encrypt.src, message_encrypt.text_encrypted)
@@ -358,6 +387,10 @@ def decryption_implementation(message):
 
     elif message_encrypt.typy_encrypt == 'Квадрат полибея (м-3)':
         message_encrypt.text = "".join(polibei_deshirf_algoritm_3(message_encrypt.text_encrypted.replace(" ", "")))
+
+    elif message_encrypt.typy_encrypt == 'Шифр Цезаря':
+        message_encrypt.text = "".join(caesar_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", ""),
+                                                               message_encrypt.n_key))
 
     elif message.text == 'Назад':
         shifrovanie_choose(message)
