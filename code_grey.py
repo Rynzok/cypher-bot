@@ -6,17 +6,11 @@ def code_grey_shifr_algoritm(message_no_space):
         binary_int = int.from_bytes(byte_array, "big")
         binary_string = bin(binary_int)[2:]
 
-        # b_string = [''] * (len(binary_string) - 2)
-        # for j in range(2, len(binary_string)):
-        #     b_string[j - 2] = str(binary_string[j])
-        # binary_num = "".join(b_string)
-
         gray_code = convert_gray(binary_string)
 
         gray_code = int(gray_code, 2)
         gray_code = gray_code.to_bytes(3, "big")
         full_massiv[i] = gray_code.decode('cp1251')
-        # full_massiv[i] = str(message_no_space[i].encode('cp1251'))
     return full_massiv
 
 
@@ -34,17 +28,11 @@ def code_grey_deshifr_algoritm(message_no_space):
         gray_int = int.from_bytes(gray_array, "big")
         gray_string = bin(gray_int)[2:]
 
-        # b_string = [''] * (len(binary_string) - 2)
-        # for j in range(2, len(binary_string)):
-        #     b_string[j - 2] = str(binary_string[j])
-        # binary_num = "".join(b_string)
-
         binary_code = convert_binary(gray_string)
 
         binary_code = int(binary_code, 2)
         binary_code = binary_code.to_bytes(3, "big")
         full_massiv[i] = binary_code.decode('cp1251')
-        # full_massiv[i] = str(message_no_space[i].encode('cp1251'))
     return full_massiv
 
 

@@ -13,6 +13,7 @@ from code_grey import code_grey_shifr_algoritm, code_grey_deshifr_algoritm
 from polibei_shifrovanie import polibei_shirf_algoritm_1, polibei_deshirf_algoritm_1, polibei_shirf_algoritm_2,\
     polibei_deshirf_algoritm_2, polibei_shirf_algoritm_3, polibei_deshirf_algoritm_3
 from caesor_chofrovanie import caesar_crypt_algorithm, caesar_decrypt_algorithm
+from red_chapel import red_chapel_cyber_algorithm
 from murkup_creation import murkup_creation
 from faind_dels import find_all_dels
 from sortirivka import fast_sort
@@ -124,7 +125,8 @@ def shifrovanie_choose3(message):
     if message.text == 'Моноалфавитная' or message.text == 'Назад':
         murkup = murkup_creation(button_names=['Атбаш', 'Шифр ДНК', 'Тарабарская грамота', 'Код Грея',
                                                'Квадрат полибея (м-1)', 'Квадрат полибея (м-2)',
-                                               'Квадрат полибея (м-3)', 'Шифр Цезаря', 'Шифр Цезаря (А)', 'Назад'])
+                                               'Квадрат полибея (м-3)', 'Шифр Цезаря', 'Шифр Цезаря (А)',
+                                               'Красной Капеллы', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
     elif message.text == 'Полиалфавитная':
@@ -234,6 +236,13 @@ def implementation_of_encryption(message):
         bot.register_next_step_handler(nsg, caesar_shifr)
         return
 
+    elif message_encrypt.typy_encrypt == 'Красной Капеллы':
+        murkup2 = types.ReplyKeyboardRemove()
+        nsg = bot.send_message(message.chat.id, f'Введите слово из 10 НЕ повторяющихся русских букв',
+                               reply_markup=murkup2)
+        bot.register_next_step_handler(nsg, red_chapel_shifr)
+        return
+
     # Блок с отправкой документа, если был изначально отправлен документ
     if message_encrypt.text_or_doc == 'Документ':
         writing_text_to_a_document(message_encrypt.src, message_encrypt.text_encrypted)
@@ -339,6 +348,22 @@ def caesar_shifr_a(message):
         msg = bot.send_document(message.chat.id, open(f'{message_encrypt.src}', 'rb'), reply_markup=murkup)
         bot.register_next_step_handler(msg, processing_result_encrypt)
         return
+    msg = bot.send_message(message.chat.id, f'{message_encrypt.text_encrypted}', reply_markup=murkup)
+    bot.register_next_step_handler(msg, processing_result_encrypt)
+
+
+def red_chapel_shifr(message):
+    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    message_encrypt.get_v_key(message.text)
+    full_massiv = red_chapel_cyber_algorithm(message_encrypt.text, message_encrypt.v_key, message_encrypt.n_key)
+    message_encrypt.text_encrypted = "".join(full_massiv)
+
+    if message_encrypt.text_or_doc == 'Документ':
+        writing_text_to_a_document(message_encrypt.src, message_encrypt.text_encrypted)
+        msg = bot.send_document(message.chat.id, open(f'{message_encrypt.src}', 'rb'), reply_markup=murkup)
+        bot.register_next_step_handler(msg, processing_result_encrypt)
+        return
+
     msg = bot.send_message(message.chat.id, f'{message_encrypt.text_encrypted}', reply_markup=murkup)
     bot.register_next_step_handler(msg, processing_result_encrypt)
 
