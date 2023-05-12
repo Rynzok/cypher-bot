@@ -1,5 +1,6 @@
 def red_chapel_cyber_algorithm(message_no_space, v_key, n_key):
     length = int(len(message_no_space))
+    message_no_space = message_no_space.lower()
     text = [''] * length
     key = [2, 6, 3, 1]
     n_key_sort = sorted(n_key)
@@ -37,4 +38,11 @@ def red_chapel_cyber_algorithm(message_no_space, v_key, n_key):
     for i in range(length):
         text[i] = dict_red_chapel[message_no_space[i]]
 
+    return text
+
+
+def slice_five(stroka):
+    text = ''
+    for i in range(0, len(stroka) - 5, 5):
+        text += stroka[i:i+5] + ' '
     return text

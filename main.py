@@ -13,7 +13,7 @@ from code_grey import code_grey_shifr_algoritm, code_grey_deshifr_algoritm
 from polibei_shifrovanie import polibei_shirf_algoritm_1, polibei_deshirf_algoritm_1, polibei_shirf_algoritm_2,\
     polibei_deshirf_algoritm_2, polibei_shirf_algoritm_3, polibei_deshirf_algoritm_3
 from caesor_chofrovanie import caesar_crypt_algorithm, caesar_decrypt_algorithm
-from red_chapel import red_chapel_cyber_algorithm
+from red_chapel import red_chapel_cyber_algorithm, slice_five
 from murkup_creation import murkup_creation
 from faind_dels import find_all_dels
 from sortirivka import fast_sort
@@ -356,7 +356,8 @@ def red_chapel_shifr(message):
     murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
     message_encrypt.get_v_key(message.text)
     full_massiv = red_chapel_cyber_algorithm(message_encrypt.text, message_encrypt.v_key, message_encrypt.n_key)
-    message_encrypt.text_encrypted = "".join(full_massiv)
+    stroka = "".join(full_massiv)
+    message_encrypt.text_encrypted = slice_five(stroka)
 
     if message_encrypt.text_or_doc == 'Документ':
         writing_text_to_a_document(message_encrypt.src, message_encrypt.text_encrypted)
