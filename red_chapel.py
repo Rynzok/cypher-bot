@@ -1,4 +1,7 @@
-def red_chapel_cyber_algorithm(message_no_space, v_key, n_key):
+import json
+
+
+def red_chapel_encryption_algorithm(message_no_space, v_key, n_key):
     length = int(len(message_no_space))
     message_no_space = message_no_space.lower()
     text = [''] * length
@@ -38,6 +41,11 @@ def red_chapel_cyber_algorithm(message_no_space, v_key, n_key):
     for i in range(length):
         text[i] = dict_red_chapel[message_no_space[i]]
 
+    # open("data_file.json", "w").close()
+
+    with open("data_file.json", "w") as write_file:
+        json.dump(dict_red_chapel, write_file)
+
     return text
 
 
@@ -45,4 +53,18 @@ def slice_five(stroka):
     text = ''
     for i in range(0, len(stroka) - 5, 5):
         text += stroka[i:i+5] + ' '
+    return text
+
+
+def red_chapel_decryption_algorithm(message_no_space):
+    length = int(len(message_no_space))
+    f = open('data_file.json', )
+    dict_red_chapel = json.load(f)
+    text = [''] * length
+    dict_red_chapel_new = {
+            value: key for key, value in dict_red_chapel.items()
+        }
+    for i in range(0, length, 2):
+        text[i] = dict_red_chapel_new[message_no_space[i] + message_no_space[i+1]]
+
     return text

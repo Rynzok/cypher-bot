@@ -13,7 +13,7 @@ from code_grey import code_grey_shifr_algoritm, code_grey_deshifr_algoritm
 from polibei_shifrovanie import polibei_shirf_algoritm_1, polibei_deshirf_algoritm_1, polibei_shirf_algoritm_2,\
     polibei_deshirf_algoritm_2, polibei_shirf_algoritm_3, polibei_deshirf_algoritm_3
 from caesor_chofrovanie import caesar_crypt_algorithm, caesar_decrypt_algorithm
-from red_chapel import red_chapel_cyber_algorithm, slice_five
+from red_chapel import red_chapel_encryption_algorithm, slice_five, red_chapel_decryption_algorithm
 from murkup_creation import murkup_creation
 from faind_dels import find_all_dels
 from sortirivka import fast_sort
@@ -355,7 +355,7 @@ def caesar_shifr_a(message):
 def red_chapel_shifr(message):
     murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
     message_encrypt.get_v_key(message.text)
-    full_massiv = red_chapel_cyber_algorithm(message_encrypt.text, message_encrypt.v_key, message_encrypt.n_key)
+    full_massiv = red_chapel_encryption_algorithm(message_encrypt.text, message_encrypt.v_key, message_encrypt.n_key)
     stroka = "".join(full_massiv)
     message_encrypt.text_encrypted = slice_five(stroka)
 
@@ -439,9 +439,16 @@ def decryption_implementation(message):
     elif message_encrypt.typy_encrypt == 'Квадрат полибея (м-3)':
         message_encrypt.text = "".join(polibei_deshirf_algoritm_3(message_encrypt.text_encrypted.replace(" ", "")))
 
-    elif message_encrypt.typy_encrypt == 'Шифр Цезаря' or 'Шифр Цезаря (А)':
+    elif message_encrypt.typy_encrypt == 'Шифр Цезаря':
         message_encrypt.text = "".join(caesar_decrypt_algorithm(message_encrypt.text_encrypted.replace(" ", ""),
                                                                 message_encrypt.step1, message_encrypt.step2))
+
+    elif message_encrypt.typy_encrypt == 'Шифр Цезаря (А)':
+        message_encrypt.text = "".join(caesar_decrypt_algorithm(message_encrypt.text_encrypted.replace(" ", ""),
+                                                                message_encrypt.step1, message_encrypt.step2))
+
+    elif message_encrypt.typy_encrypt == 'Красной Капеллы':
+        message_encrypt.text = "".join(red_chapel_decryption_algorithm(message_encrypt.text_encrypted.replace(" ", "")))
 
     elif message.text == 'Назад':
         shifrovanie_choose(message)
