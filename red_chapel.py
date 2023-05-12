@@ -1,5 +1,3 @@
-
-
 def red_chapel_cyber_algorithm(message_no_space, v_key, n_key):
     length = int(len(message_no_space))
     text = [''] * length
@@ -20,25 +18,23 @@ def red_chapel_cyber_algorithm(message_no_space, v_key, n_key):
     alphabet[34] = '!'
     alphabet[35] = '?'
     alphabet[36] = ':'
-    alphabet[37] = ';'
+    alphabet[37] = 'ё'
     alphabet[38] = '('
     alphabet[39] = ')'
 
-    print(alphabet)
-    # return text
     for i in range(len(v_key)):
         alphabet.remove(v_key[i])
-    print(alphabet)
 
     dict_red_chapel = {}
 
-    for i in range(4):
-        for j in range(10):
+    for i in range(len(key)):
+        for j in range(len(v_key)):
             if i == 0:
                 dict_red_chapel[v_key[j]] = str(key[i]) + str(n_key[j])
             else:
                 dict_red_chapel[alphabet[j + 10*(i-1)]] = str(key[i]) + str(n_key[j])
-    print(dict_red_chapel.items())
 
+    for i in range(length):
+        text[i] = dict_red_chapel[message_no_space[i]]
 
-red_chapel_cyber_algorithm('папа', ['а', 'в', 'г', 'у', 'с', 'т', 'и', 'н', 'е', 'ц'], [1, 3, 4, 21, 19, 20, 10, 14, 6, 24])
+    return text
