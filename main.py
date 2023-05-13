@@ -17,6 +17,7 @@ from caesor_shifrovanie import caesar_crypt_algorithm, caesar_decrypt_algorithm,
 from red_chapel import red_chapel_encryption_algorithm, slice_five, red_chapel_decryption_algorithm
 from trisemus_shifrovanie import trisemus_decrypt_algorithm, trisemus_encrypt_algorithm
 from gronsfeld_encryption import gronsfeld_decrypt_algorithm, gronsfeld_encrypt_algorithm
+from playfair_encryption import playfair_encrypt_algorithm, playfair_decrypt_algorithm
 from murkup_creation import murkup_creation
 from faind_dels import find_all_dels
 from sortirivka import fast_sort
@@ -130,7 +131,7 @@ def shifrovanie_choose3(message):
                                                'Квадрат полибея (м-1)', 'Квадрат полибея (м-2)',
                                                'Квадрат полибея (м-3)', 'Шифр Цезаря', 'Шифр Цезаря (А)',
                                                'Шифр Цезаря (слово)', 'Красной Капеллы', 'Шифр Трисемуса',
-                                               'Шифр Гронсфельда', 'Назад'])
+                                               'Шифр Гронсфельда', 'Шифр Плейфера', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
     elif message.text == 'Полиалфавитная':
@@ -266,6 +267,13 @@ def implementation_of_encryption(message):
         nsg = bot.send_message(message.chat.id, f'Введите последовательность цифр',
                                reply_markup=murkup2)
         bot.register_next_step_handler(nsg, gronsfeld_shifr)
+        return
+
+    elif message_encrypt.typy_encrypt == 'Шифр Плейфера':
+        murkup2 = types.ReplyKeyboardRemove()
+        nsg = bot.send_message(message.chat.id, f'Введите послндовательность из НЕ повторяющихся русских букв',
+                               reply_markup=murkup2)
+        bot.register_next_step_handler(nsg, playfair_shifr)
         return
 
     # Блок с отправкой документа, если был изначально отправлен документ
@@ -452,6 +460,22 @@ def gronsfeld_shifr(message):
     bot.register_next_step_handler(msg, processing_result_encrypt)
 
 
+def playfair_shifr(message):
+    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    message_encrypt.get_v_key(message.text)
+    full_massiv = playfair_encrypt_algorithm(message_encrypt.text, message_encrypt.v_key)
+    message_encrypt.text_encrypted = "".join(full_massiv)
+
+    if message_encrypt.text_or_doc == 'Документ':
+        writing_text_to_a_document(message_encrypt.src, message_encrypt.text_encrypted)
+        msg = bot.send_document(message.chat.id, open(f'{message_encrypt.src}', 'rb'), reply_markup=murkup)
+        bot.register_next_step_handler(msg, processing_result_encrypt)
+        return
+
+    msg = bot.send_message(message.chat.id, f'{message_encrypt.text_encrypted}', reply_markup=murkup)
+    bot.register_next_step_handler(msg, processing_result_encrypt)
+
+
 # Выбор действий после шифрования
 def processing_result_encrypt(message):
     if message.text == 'Новая фраза':
@@ -542,6 +566,9 @@ def decryption_implementation(message):
     elif message_encrypt.typy_encrypt == 'Шифр Шифр Гронсфельда':
         message_encrypt.text = "".join(gronsfeld_encrypt_algorithm(message_encrypt.text_encrypted.replace(" ", ""),
                                                                    message_encrypt.n_key))
+
+    elif message_encrypt.typy_encrypt == 'Шифр Плейфера':
+        message_encrypt.text = "".join(playfair_decrypt_algorithm(message_encrypt.text_encrypted.replace(" ", "")))
 
     elif message.text == 'Назад':
         shifrovanie_choose(message)
