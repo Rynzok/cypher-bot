@@ -86,12 +86,12 @@ def caesar_word_crypt_algorithm(message_no_space, step1, v_key):
 def caesar_word_decrypt_algorithm(message_no_space):
     length = int(len(message_no_space))
     f = open('data_file.json', )
-    dict_red_chapel = json.load(f)
+    dict_caesar = json.load(f)
     text = [''] * length
-    dict_red_chapel_new = {
-            value: key for key, value in dict_red_chapel.items()
+    dict_caesar_new = {
+            value: key for key, value in dict_caesar.items()
         }
     for i in range(length):
-        text[i] = dict_red_chapel_new[message_no_space[i]]
+        text[i] = dict_caesar_new[message_no_space[i]]
 
     return text
