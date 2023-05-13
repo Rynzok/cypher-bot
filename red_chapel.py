@@ -41,8 +41,6 @@ def red_chapel_encryption_algorithm(message_no_space, v_key, n_key):
     for i in range(length):
         text[i] = dict_red_chapel[message_no_space[i]]
 
-    # open("data_file.json", "w").close()
-
     with open("data_file.json", "w") as write_file:
         json.dump(dict_red_chapel, write_file)
 
@@ -50,11 +48,9 @@ def red_chapel_encryption_algorithm(message_no_space, v_key, n_key):
 
 
 def slice_five(stroka):
-    print(stroka)
     text = ''
     for i in range(0, len(stroka), 5):
         text += stroka[i:i+5] + ' '
-    print(text)
     return text
 
 
