@@ -50,9 +50,11 @@ def red_chapel_encryption_algorithm(message_no_space, v_key, n_key):
 
 
 def slice_five(stroka):
+    print(stroka)
     text = ''
-    for i in range(0, len(stroka) - 5, 5):
+    for i in range(0, len(stroka), 5):
         text += stroka[i:i+5] + ' '
+    print(text)
     return text
 
 
