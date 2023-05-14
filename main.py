@@ -20,6 +20,7 @@ from gronsfeld_encryption import gronsfeld_decrypt_algorithm, gronsfeld_encrypt_
 from playfair_encryption import playfair_encrypt_algorithm, playfair_decrypt_algorithm
 from futurama_code import futurama_encrypt_algorithm, futurama_decrypt_algorithm
 from vigenera_code import vigenera_encrypt_algorithm, vigenera_decrypt_algorithm
+from kiselev_code import kiselev_encrypt_algoritm, kiselev_decrypt_algoritm
 from murkup_creation import murkup_creation
 from faind_dels import find_all_dels
 from sortirivka import fast_sort
@@ -133,7 +134,7 @@ def shifrovanie_choose3(message):
                                                'Квадрат полибея (м-1)', 'Квадрат полибея (м-2)',
                                                'Квадрат полибея (м-3)', 'Шифр Цезаря', 'Шифр Цезаря (А)',
                                                'Шифр Цезаря (слово)', 'Красной Капеллы', 'Шифр Трисемуса',
-                                               'Шифр Гронсфельда', 'Шифр Плейфера', 'Назад'])
+                                               'Шифр Гронсфельда', 'Шифр Плейфера', 'Шифр Киселёва', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
     elif message.text == 'Полиалфавитная':
@@ -278,6 +279,9 @@ def implementation_of_encryption(message):
                                reply_markup=murkup2)
         bot.register_next_step_handler(nsg, playfair_shifr)
         return
+
+    elif message_encrypt.typy_encrypt == 'Шифр Киселёва':
+        message_encrypt.get_text_encrypted("".join(kiselev_encrypt_algoritm(message_encrypt.text)))
 
     elif message_encrypt.typy_encrypt == 'Шифр Футурама':
         message_encrypt.get_text_encrypted("".join(futurama_encrypt_algorithm(message_encrypt.text)))
@@ -611,6 +615,9 @@ def decryption_implementation(message):
 
     elif message_encrypt.typy_encrypt == 'Шифр Плейфера':
         message_encrypt.text = "".join(playfair_decrypt_algorithm(message_encrypt.text_encrypted.replace(" ", "")))
+
+    elif message_encrypt.typy_encrypt == 'Шифр Киселёва':
+        message_encrypt.text = "".join(kiselev_decrypt_algoritm(message_encrypt.text_encrypted.replace(" ", "")))
 
     elif message_encrypt.typy_encrypt == 'Шифр Футурама':
         message_encrypt.text = "".join(futurama_decrypt_algorithm(message_encrypt.text_encrypted.replace(" ", "")))

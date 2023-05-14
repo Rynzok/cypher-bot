@@ -14,6 +14,7 @@ def code_grey_shifr_algoritm(message_no_space):
     return full_massiv
 
 
+# Конвертируем обычный двоичный код в код Грея используя исключающее или
 def convert_gray(binary):
     binary = int(binary, 2)
     binary ^= (binary >> 1)
@@ -36,6 +37,7 @@ def code_grey_deshifr_algoritm(message_no_space):
     return full_massiv
 
 
+# Конвертируем код Грея в двоичный код
 def convert_binary(gray_code):
     binary = 0
     gray_code = int(gray_code, 2)
