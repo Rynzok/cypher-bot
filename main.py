@@ -183,6 +183,7 @@ def implementation_of_encryption(message):
     elif message_encrypt.typy_encrypt == 'По числовому ключу':
         murkup2 = types.ReplyKeyboardRemove()
         size = find_all_dels(int(len(message_encrypt.text)))
+        message_encrypt.get_sides(size[1], size[0])
         nsg = bot.send_message(message.chat.id, f'Введите последовательность из {size[0]} НЕ повторяющихся числел',
                                reply_markup=murkup2)
         bot.register_next_step_handler(nsg, numeric_key_shifr_step_2)
@@ -302,8 +303,14 @@ def implementation_of_encryption(message):
 # Получение ключа
 def numeric_key_shifr_step_2(message):
     murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    if len(message.text) != message_encrypt.columns:
+        bot.send_message(message.chat.id, 'Раз не умеешь читать или считать, то начинай с начала')
+        start(message)
+        return
+
     if message_encrypt.typy_encrypt == 'По буквенному ключу':
         message_encrypt.get_v_key(message.text)
+
     else:
         message_encrypt.get_n_key(message.text)
     full_massiv = numeric_key_shifr_algoritm(message_encrypt.text, message_encrypt.n_key,
@@ -324,6 +331,11 @@ def numeric_key_shifr_step_2(message):
 
 # Получение первого ключа
 def double_shifr(message):
+    if len(message.text) != message_encrypt.columns:
+        bot.send_message(message.chat.id, 'Раз не умеешь читать или считать, то начинай с начала')
+        start(message)
+        return
+
     murkup = types.ReplyKeyboardRemove()
     message_encrypt.get_n_key(message.text)
     message_encrypt.n_key_last = list(message.text)
@@ -334,7 +346,6 @@ def double_shifr(message):
     stroka = stroka.replace("]", "")
     stroka = stroka.replace("'", "")
     message_encrypt.text = stroka
-    bot.send_message(message.chat.id, f'{message_encrypt.text}')
     msg = bot.send_message(message.chat.id, f'Введите последовательность из {message_encrypt.rows} НЕ одинаковых чисел',
                            reply_markup=murkup)
     bot.register_next_step_handler(msg, double_shifr_step_2)
@@ -342,6 +353,10 @@ def double_shifr(message):
 
 # Получение второго ключа
 def double_shifr_step_2(message):
+    if len(message.text) != message_encrypt.rows:
+        bot.send_message(message.chat.id, 'Раз не умеешь читать или считать, то начинай с начала')
+        start(message)
+        return
     murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
     message_encrypt.get_n_key(message.text)
     full_massiv = double_shifr_algoritm(message_encrypt.text, message_encrypt.n_key,
@@ -547,7 +562,6 @@ def decryption_implementation(message):
                                                                                                                 ""),
                                                                          message_encrypt.n_key,
                                                                          message_encrypt.n_key_ascending))
-        bot.send_message(message.chat.id, f'{message_encrypt.text_encrypted}')
         message_encrypt.get_n_key(message_encrypt.n_key_last)
         message_encrypt.text = "".join(numeric_key_deshifr_algoritm(message_encrypt.text_encrypted.replace(" ", ""),
                                                                     message_encrypt.n_key,
