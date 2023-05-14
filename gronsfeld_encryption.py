@@ -16,6 +16,8 @@ def gronsfeld_decrypt_algorithm(message_no_space, n_key):
                 shift -= 66
             full_massiv[n] = simple_dictionary[shift]
             n += 1
+            if n == length:
+                break
 
     return full_massiv
 
@@ -35,6 +37,8 @@ def gronsfeld_encrypt_algorithm(message_no_space, n_key):
                 shift += 66
             full_massiv[n] = simple_dictionary[shift]
             n += 1
+            if n == length:
+                break
 
     return full_massiv
 

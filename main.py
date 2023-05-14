@@ -19,6 +19,7 @@ from trisemus_shifrovanie import trisemus_decrypt_algorithm, trisemus_encrypt_al
 from gronsfeld_encryption import gronsfeld_decrypt_algorithm, gronsfeld_encrypt_algorithm
 from playfair_encryption import playfair_encrypt_algorithm, playfair_decrypt_algorithm
 from futurama_code import futurama_encrypt_algorithm, futurama_decrypt_algorithm
+from vigenera_code import vigenera_encrypt_algorithm, vigenera_decrypt_algorithm
 from murkup_creation import murkup_creation
 from faind_dels import find_all_dels
 from sortirivka import fast_sort
@@ -280,6 +281,13 @@ def implementation_of_encryption(message):
     elif message_encrypt.typy_encrypt == 'Шифр Футурама':
         message_encrypt.get_text_encrypted("".join(futurama_encrypt_algorithm(message_encrypt.text)))
 
+    elif message_encrypt.typy_encrypt == 'Шифр Виженера':
+        murkup2 = types.ReplyKeyboardRemove()
+        nsg = bot.send_message(message.chat.id, f'Введите послндовательность из НЕ повторяющихся русских букв',
+                               reply_markup=murkup2)
+        bot.register_next_step_handler(nsg, vigenera_shifr)
+        return
+
     # Блок с отправкой документа, если был изначально отправлен документ
     if message_encrypt.text_or_doc == 'Документ':
         writing_text_to_a_document(message_encrypt.src, message_encrypt.text_encrypted)
@@ -480,6 +488,22 @@ def playfair_shifr(message):
     bot.register_next_step_handler(msg, processing_result_encrypt)
 
 
+def vigenera_shifr(message):
+    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    message_encrypt.get_v_key(message.text)
+    full_massiv = vigenera_encrypt_algorithm(message_encrypt.text, message_encrypt.n_key)
+    message_encrypt.text_encrypted = "".join(full_massiv)
+
+    if message_encrypt.text_or_doc == 'Документ':
+        writing_text_to_a_document(message_encrypt.src, message_encrypt.text_encrypted)
+        msg = bot.send_document(message.chat.id, open(f'{message_encrypt.src}', 'rb'), reply_markup=murkup)
+        bot.register_next_step_handler(msg, processing_result_encrypt)
+        return
+
+    msg = bot.send_message(message.chat.id, f'{message_encrypt.text_encrypted}', reply_markup=murkup)
+    bot.register_next_step_handler(msg, processing_result_encrypt)
+
+
 # Выбор действий после шифрования
 def processing_result_encrypt(message):
     if message.text == 'Новая фраза':
@@ -576,6 +600,10 @@ def decryption_implementation(message):
 
     elif message_encrypt.typy_encrypt == 'Шифр Футурама':
         message_encrypt.text = "".join(futurama_decrypt_algorithm(message_encrypt.text_encrypted.replace(" ", "")))
+
+    elif message_encrypt.typy_encrypt == 'Шифр Виженера':
+        message_encrypt.text = "".join(vigenera_decrypt_algorithm(message_encrypt.text_encrypted.replace(" ", ""),
+                                                                  message_encrypt.n_key))
 
     elif message.text == 'Назад':
         shifrovanie_choose(message)
