@@ -18,6 +18,7 @@ from red_chapel import red_chapel_encryption_algorithm, slice_five, red_chapel_d
 from trisemus_shifrovanie import trisemus_decrypt_algorithm, trisemus_encrypt_algorithm
 from gronsfeld_encryption import gronsfeld_decrypt_algorithm, gronsfeld_encrypt_algorithm
 from playfair_encryption import playfair_encrypt_algorithm, playfair_decrypt_algorithm
+from futurama_code import futurama_encrypt_algorithm, futurama_decrypt_algorithm
 from murkup_creation import murkup_creation
 from faind_dels import find_all_dels
 from sortirivka import fast_sort
@@ -135,7 +136,7 @@ def shifrovanie_choose3(message):
         msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
     elif message.text == 'Полиалфавитная':
-        murkup = murkup_creation(button_names=['Футрамы', 'Вижнера', 'Назад'])
+        murkup = murkup_creation(button_names=['Шифр Футурама', 'Шифр Виженера', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
     elif message.text == 'назад':
@@ -275,6 +276,9 @@ def implementation_of_encryption(message):
                                reply_markup=murkup2)
         bot.register_next_step_handler(nsg, playfair_shifr)
         return
+
+    elif message_encrypt.typy_encrypt == 'Шифр Футурама':
+        message_encrypt.get_text_encrypted("".join(futurama_encrypt_algorithm(message_encrypt.text)))
 
     # Блок с отправкой документа, если был изначально отправлен документ
     if message_encrypt.text_or_doc == 'Документ':
@@ -569,6 +573,9 @@ def decryption_implementation(message):
 
     elif message_encrypt.typy_encrypt == 'Шифр Плейфера':
         message_encrypt.text = "".join(playfair_decrypt_algorithm(message_encrypt.text_encrypted.replace(" ", "")))
+
+    elif message_encrypt.typy_encrypt == 'Шифр Футурама':
+        message_encrypt.text = "".join(futurama_decrypt_algorithm(message_encrypt.text_encrypted.replace(" ", "")))
 
     elif message.text == 'Назад':
         shifrovanie_choose(message)
