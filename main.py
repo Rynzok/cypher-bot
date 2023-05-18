@@ -33,6 +33,7 @@ bot = telebot.TeleBot('6224570536:AAFi5BRh9OUwi3CwJqxSg5TObeOSbBNf3DE')
 class MessageEncryption:
     def __init__(self, type_encrypt):
         self.typy_encrypt = type_encrypt
+        self.way_encrypt = ''
         self.text_or_doc = ''
         self.text = ''
         self.text_encrypted = ''
@@ -45,6 +46,8 @@ class MessageEncryption:
         self.src = ''
         self.step1 = 0
         self.step2 = 1
+
+    level_encrypt = ''
 
     def get_text(self, text, type_text):
         self.text = text
@@ -88,48 +91,72 @@ def start(message):
 
 # Анализ ответа пользователя с дальнейшим переходам в другой блок.
 def user_answer(message):
-    if message.text == 'Шифрование' or message.text == 'назад' or message.text == 'Назад':
-        murkup = murkup_creation(button_names=['Перестановка', 'Замена', 'назад'])
+    message_encrypt.way_encrypt = ''
+    if message.text == 'Шифрование' or message.text == 'Назад':
+        murkup = murkup_creation(button_names=['Перестановка', 'Замена', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Каким способом?', reply_markup=murkup)
-        bot.register_next_step_handler(msg, shifrovanie_choose)
+        bot.register_next_step_handler(msg, shifrovanie_choose_way)
+        return
     elif message.text == 'Дешифрование':
-        murkup = murkup_creation(button_names=['Перестановка', 'Замена', 'назад'])
+        murkup = murkup_creation(button_names=['Перестановка', 'Замена', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Каким способом?', reply_markup=murkup)
         bot.register_next_step_handler(msg, deshifrovanie_choose)
+        return
 
 
 # Выбранно шифрование. Выбор его типа.
-def shifrovanie_choose(message):
-    if message.text == 'Перестановка' or message.text == 'Назад':
-        murkup = murkup_creation(button_names=['Простая', 'Сложная', 'назад'])
+def shifrovanie_choose_way(message):
+    message_encrypt.level_encrypt = ''
+    if message.text == 'Перестановка' or message_encrypt.way_encrypt == 'Перестановка':
+        if message.text == 'Перестановка':
+            message_encrypt.way_encrypt = message.text
+        murkup = murkup_creation(button_names=['Простая', 'Сложная', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Какой уровень сложности?', reply_markup=murkup)
-        bot.register_next_step_handler(msg, shifrovanie_choose2)
-    elif message.text == 'Замена':
+        bot.register_next_step_handler(msg, shifrovanie_choose_level)
+        return
+
+    elif message.text == 'Замена' or message_encrypt.way_encrypt == 'Замена':
+        if message.text == 'Замена':
+            message_encrypt.way_encrypt = message.text
         murkup = murkup_creation(button_names=['Моноалфавитная', 'Полиалфавитная', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Каким способом?', reply_markup=murkup)
-        bot.register_next_step_handler(msg, shifrovanie_choose3)
-    elif message.text == 'назад':
+        bot.register_next_step_handler(msg, shifrovanie_choose_method)
+        return
+
+    elif message.text == 'Назад':
         start(message)
+        return
 
 
 # Выбор конкретного способа шифрования
-def shifrovanie_choose2(message):
-    if message.text == 'Простая' or message.text == 'Назад':
+def shifrovanie_choose_level(message):
+    if message.text == 'Простая' or message_encrypt.level_encrypt == 'Простая':
+        if message.text == 'Простая':
+            message_encrypt.level_encrypt = message.text
         murkup = murkup_creation(button_names=['Вертикальная', 'Меандровая', 'Спиральная', 'Диагональная', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
-    elif message.text == 'Сложная':
+        return
+
+    elif message.text == 'Сложная' or message_encrypt.level_encrypt == 'Сложная':
+        if message.text == 'Сложная':
+            message_encrypt.level_encrypt = message.text
         murkup = murkup_creation(button_names=['Магичсекий квадрат', 'Двойная перестановка', 'По числовому ключу',
                                                'По буквенному ключу', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
-    elif message.text == 'назад':
+        return
+
+    elif message.text == 'Назад':
         user_answer(message)
+        return
 
 
 # Выбор конкретного способа шифрования
-def shifrovanie_choose3(message):
-    if message.text == 'Моноалфавитная' or message.text == 'Назад':
+def shifrovanie_choose_method(message):
+    if message.text == 'Моноалфавитная' or message_encrypt.level_encrypt == 'Моноалфавитная':
+        if message.text == 'Моноалфавитная':
+            message_encrypt.level_encrypt = message.text
         murkup = murkup_creation(button_names=['Атбаш', 'Шифр ДНК', 'Тарабарская грамота', 'Код Грея',
                                                'Квадрат полибея (м-1)', 'Квадрат полибея (м-2)',
                                                'Квадрат полибея (м-3)', 'Шифр Цезаря', 'Шифр Цезаря (А)',
@@ -137,18 +164,25 @@ def shifrovanie_choose3(message):
                                                'Шифр Гронсфельда', 'Шифр Плейфера', 'Шифр Киселёва', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
-    elif message.text == 'Полиалфавитная':
+        return
+
+    elif message.text == 'Полиалфавитная' or message_encrypt.level_encrypt == 'Полиалфавитная':
+        if message.text == 'Полиалфавитная':
+            message_encrypt.level_encrypt = message.text
         murkup = murkup_creation(button_names=['Шифр Футурама', 'Шифр Виженера', 'Назад'])
         msg = bot.send_message(message.chat.id, 'Выбери конкретный способ шифрования', reply_markup=murkup)
         bot.register_next_step_handler(msg, shifrovanie)
-    elif message.text == 'назад':
+        return
+
+    elif message.text == 'Назад':
         user_answer(message)
+        return
 
 
 # Выбор сделан. Отправка сообщения о вводе текса для шифрования
 def shifrovanie(message):
     if message.text == 'Назад':
-        shifrovanie_choose(message)
+        shifrovanie_choose_way(message)
         return
     murkup = types.ReplyKeyboardRemove()
     message_encrypt.typy_encrypt = message.text
@@ -531,7 +565,7 @@ def processing_result_encrypt(message):
     elif message.text == 'Дешифровать':
         decryption_implementation(message)
     elif message.text == 'Назад':
-        shifrovanie_choose2(message)
+        shifrovanie_choose_level(message)
     elif message.text == 'В начало':
         start(message)
     else:
@@ -627,7 +661,7 @@ def decryption_implementation(message):
                                                                   message_encrypt.n_key))
 
     elif message.text == 'Назад':
-        shifrovanie_choose(message)
+        shifrovanie_choose_way(message)
 
     if message_encrypt.text_or_doc == 'Документ':
         writing_text_to_a_document(message_encrypt.src, message_encrypt.text)
