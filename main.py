@@ -31,23 +31,22 @@ bot = telebot.TeleBot('6224570536:AAFi5BRh9OUwi3CwJqxSg5TObeOSbBNf3DE')
 
 
 class MessageEncryption:
-    def __init__(self, type_encrypt):
-        self.typy_encrypt = type_encrypt
-        self.way_encrypt = ''
-        self.text_or_doc = ''
-        self.text = ''
-        self.text_encrypted = ''
-        self.rows = 0
-        self.columns = 0
-        self.n_key = []
-        self.n_key_last = []
-        self.v_key = ''
-        self.n_key_ascending = []
-        self.src = ''
-        self.step1 = 0
-        self.step2 = 1
 
+    way_encrypt = ''
     level_encrypt = ''
+    typy_encrypt = ''
+    text_or_doc = ''
+    text = ''
+    text_encrypted = ''
+    rows = 0
+    columns = 0
+    n_key = []
+    n_key_last = []
+    v_key = ''
+    n_key_ascending = []
+    src = ''
+    step1 = 0
+    step2 = 1
 
     def get_text(self, text, type_text):
         self.text = text
@@ -78,7 +77,7 @@ class MessageEncryption:
         self.n_key_ascending = fast_sort(array_of_numbers)
 
 
-message_encrypt = MessageEncryption("")
+message_encrypt = MessageEncryption()
 
 
 # Начало работы. Две кнопки выбора. Реализованно пока только шифрование
