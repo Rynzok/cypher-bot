@@ -2,21 +2,21 @@ from faind_dels import find_all_dels
 
 
 def meandr_shifr_algoritm(message_no_space):
-    lenght = int(len(message_no_space))
+    length = int(len(message_no_space))
     n = 0
-    size = find_all_dels(lenght)
+    size = find_all_dels(length)
     massiv = [[0] * size[0] for i in range(size[1])]
 
     for i in range(size[1]):
         for j in range(size[0]):
             massiv[i][j] = message_no_space[n]
             n += 1
-            if n == lenght:
+            if n == length:
                 break
-        if n == lenght:
+        if n == length:
             break
 
-    full_massiv = [''] * lenght
+    full_massiv = [''] * length
     n = 0
 
     for j in range(size[0]):
@@ -34,25 +34,25 @@ def meandr_shifr_algoritm(message_no_space):
     return full_massiv
 
 
-def meandr_deshifr_algoritm(stroka):
-    lenght = int(len(stroka))
+def meandr_deshifr_algoritm(message):
+    length = int(len(message))
     n = 0
-    size = find_all_dels(lenght)
+    size = find_all_dels(length)
     massiv = [[0] * size[0] for i in range(size[1])]
 
     for j in range(size[0]):
         if j % 2 == 0:
             for i in range(size[1]):
-                massiv[i][j] = stroka[n]
+                massiv[i][j] = message[n]
                 n += 1
         else:
             for i in range(size[1]-1, -1, -1):
-                massiv[i][j] = stroka[n]
+                massiv[i][j] = message[n]
                 n += 1
-                if n == lenght:
+                if n == length:
                     break
 
-    full_massiv = [''] * lenght
+    full_massiv = [''] * length
     n = 0
 
     for i in range(size[1]):

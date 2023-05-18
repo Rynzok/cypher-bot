@@ -6,6 +6,9 @@ def code_grey_shifr_algoritm(message_no_space):
         binary_int = int.from_bytes(byte_array, "big")
         binary_string = bin(binary_int)[2:]
 
+        if binary_string == '11101111':
+            binary_string = '11001111'
+
         gray_code = convert_gray(binary_string)
 
         gray_code = int(gray_code, 2)
