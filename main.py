@@ -191,7 +191,8 @@ def shifrovanie(message):
 
 # Реализация методов шифрования
 def implementation_of_encryption(message):
-    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Описание', 'Получить код', 'Назад',
+                                           'В начало'])
     # Блок с обработкой документа или текста
     if message.document:
         bot.send_message(message.chat.id, 'Это документ')
@@ -339,7 +340,8 @@ def implementation_of_encryption(message):
 
 # Получение ключа
 def numeric_key_shifr_step_2(message):
-    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Описание', 'Получить код', 'Назад',
+                                           'В начало'])
     if len(message.text) != message_encrypt.columns:
         bot.send_message(message.chat.id, 'Раз не умеешь читать или считать, то начинай с начала')
         start(message)
@@ -394,7 +396,8 @@ def double_shifr_step_2(message):
         bot.send_message(message.chat.id, 'Раз не умеешь читать или считать, то начинай с начала')
         start(message)
         return
-    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Описание', 'Получить код', 'Назад',
+                                           'В начало'])
     message_encrypt.get_n_key(message.text)
     full_massiv = double_shifr_algoritm(message_encrypt.text, message_encrypt.n_key,
                                         message_encrypt.n_key_ascending)
@@ -429,7 +432,8 @@ def caesar_shifr(message):
         bot.register_next_step_handler(nsg, caesar_shifr_word)
         return
 
-    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Описание', 'Получить код', 'Назад',
+                                           'В начало'])
     message_encrypt.step2 = 1
     full_massiv = caesar_crypt_algorithm(message_encrypt.text, message_encrypt.step1, message_encrypt.step2)
     stroka = "".join(full_massiv)
@@ -446,7 +450,8 @@ def caesar_shifr(message):
 
 
 def caesar_shifr_a(message):
-    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Описание', 'Получить код', 'Назад',
+                                           'В начало'])
     message_encrypt.step2 = int(message.text)
     full_massiv = caesar_crypt_algorithm(message_encrypt.text, message_encrypt.step1, message_encrypt.step2)
     stroka = "".join(full_massiv)
@@ -461,7 +466,8 @@ def caesar_shifr_a(message):
 
 
 def caesar_shifr_word(message):
-    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Описание', 'Получить код', 'Назад',
+                                           'В начало'])
     message_encrypt.get_v_key(message.text)
     full_massiv = caesar_word_crypt_algorithm(message_encrypt.text, message_encrypt.step1, message_encrypt.v_key)
     stroka = "".join(full_massiv)
@@ -476,7 +482,8 @@ def caesar_shifr_word(message):
 
 
 def red_chapel_shifr(message):
-    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Описание', 'Получить код', 'Назад',
+                                           'В начало'])
     message_encrypt.get_v_key(message.text)
     full_massiv = red_chapel_encryption_algorithm(message_encrypt.text, message_encrypt.v_key, message_encrypt.n_key)
     stroka = "".join(full_massiv)
@@ -493,7 +500,8 @@ def red_chapel_shifr(message):
 
 
 def trisemus_shifr(message):
-    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Описание', 'Получить код', 'Назад',
+                                           'В начало'])
     message_encrypt.get_v_key(message.text)
     full_massiv = trisemus_decrypt_algorithm(message_encrypt.text, message_encrypt.v_key)
     message_encrypt.text_encrypted = "".join(full_massiv)
@@ -509,7 +517,8 @@ def trisemus_shifr(message):
 
 
 def gronsfeld_shifr(message):
-    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Описание', 'Получить код', 'Назад',
+                                           'В начало'])
     message_encrypt.get_n_key(message.text)
     full_massiv = gronsfeld_decrypt_algorithm(message_encrypt.text, message_encrypt.n_key)
     message_encrypt.text_encrypted = "".join(full_massiv)
@@ -525,7 +534,8 @@ def gronsfeld_shifr(message):
 
 
 def playfair_shifr(message):
-    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Описание', 'Получить код', 'Назад',
+                                           'В начало'])
     message_encrypt.get_v_key(message.text)
     full_massiv = playfair_encrypt_algorithm(message_encrypt.text, message_encrypt.v_key)
     message_encrypt.text_encrypted = "".join(full_massiv)
@@ -541,7 +551,8 @@ def playfair_shifr(message):
 
 
 def vigenera_shifr(message):
-    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Назад', 'В начало'])
+    murkup = murkup_creation(button_names=['Новая фраза', 'Дешифровать', 'Описание', 'Получить код', 'Назад',
+                                           'В начало'])
     message_encrypt.get_v_key(message.text)
     full_massiv = vigenera_encrypt_algorithm(message_encrypt.text, message_encrypt.n_key)
     message_encrypt.text_encrypted = "".join(full_massiv)
@@ -563,6 +574,10 @@ def processing_result_encrypt(message):
         bot.register_next_step_handler(msg, implementation_of_encryption)
     elif message.text == 'Дешифровать':
         decryption_implementation(message)
+    elif message.text == 'Описание':
+        getting_description(message)
+    elif message.text == 'Получить код':
+        getting_code(message)
     elif message.text == 'Назад':
         shifrovanie_choose_level(message)
     elif message.text == 'В начало':
@@ -573,7 +588,7 @@ def processing_result_encrypt(message):
 
 
 def decryption_implementation(message):
-    murkup = murkup_creation(button_names=['Новая фраза', 'Назад', 'В начало'])
+    murkup = murkup_creation(button_names=['Новая фраза', 'Описание', 'Получить код', 'Назад', 'В начало'])
     if message_encrypt.text_or_doc == 'Документ':
         bot.send_message(message.chat.id, 'Это документ')
         open(message_encrypt.src, 'rb+')
@@ -668,6 +683,33 @@ def decryption_implementation(message):
         bot.register_next_step_handler(msg, processing_result_encrypt)
         return
     msg = bot.send_message(message.chat.id, f'{message_encrypt.text}', reply_markup=murkup)
+    bot.register_next_step_handler(msg, processing_result_encrypt)
+
+
+def getting_description(message):
+    murkup = murkup_creation(button_names=['Новая фраза', 'Описание', 'Получить код', 'Назад', 'В начало'])
+    text = 'Информация пока отсутсвует'
+    if message_encrypt.typy_encrypt == 'Красной Капеллы':
+        text = 'Система шифра «Красной тройки» несколько отличалась от «квадратного пропорционального метода» Рихарда' \
+               ' Зорге, позволяющего значительно «сжимать» шифруемый текст. Но суть оставалась той же. К тому же' \
+               ' здесь с легкостью использовалась уже любая книга. Предположим, разведчик хотел сообщить в Москву,' \
+               ' что «Лейбштандарт СС Адольф Гитлер» прибыл в Варшаву.  Для кодирования своего послания Пюнтер' \
+               ' применил путевые заметки шведского исследователя Свена Хидина «От полюса к полюсу» и выписал' \
+               ' случайное предложение со страницы 12: «Документальные съемки приостановлены, но вскоре будут' \
+               ' возобновлены снова». Поскольку для ключевого слова ему требовались только десять букв, он взял' \
+               ' часть первого слова «Dokumentar» (по-немецки). Пюнтер записал ключевое слово прописью и ниже его' \
+               ' в две строчки буквы алфавита, не содержащиеся в слове «Dokumentar». По левому краю трех строк он' \
+               ' проставил свои условные цифры (461), а над ключевым словом выписал порядковые номера соответствующих' \
+               ' букв в латинском алфавите. В результате каждая буква выражалась двузначным числом: А — 14, В — 26,' \
+               ' С – 76 (первая цифра – столбец, вторая – строка в табличке).'
+
+    msg = bot.send_message(message.chat.id, f'{text}', reply_markup=murkup)
+    bot.register_next_step_handler(msg, processing_result_encrypt)
+
+
+def getting_code(message):
+    murkup = murkup_creation(button_names=['Новая фраза', 'Описание', 'Получить код', 'Назад', 'В начало'])
+    msg = bot.send_message(message.chat.id, 'https://t.me/Rynzok', reply_markup=murkup)
     bot.register_next_step_handler(msg, processing_result_encrypt)
 
 
